@@ -1,0 +1,32 @@
+@import "tailwindcss";
+
+:root {
+  --page-gradient: radial-gradient(circle at 0% 77%, #171717 0%, #31002c 100%);
+  --purple-transparent: rgb(88 28 135 / 0.5);
+  --light-purple: #c40db1;
+}
+
+@theme inline {
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+
+  --color-light-purple: var(--light-purple);
+  --color-purple-transparent: var(--purple-transparent);
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+html {
+  background: var(--page-gradient) fixed;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+body {
+  background: transparent;
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
