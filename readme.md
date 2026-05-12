@@ -168,3 +168,12 @@ Then type:
 {"type":"zone_update","zone":"top"}
 {"type":"zone_update","zone":null}
 ```
+
+## Start tracking python env
+
+```bash
+cd tracking
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+```

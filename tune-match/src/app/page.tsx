@@ -3,38 +3,52 @@
 import { useCallback, useEffect, useState } from "react";
 import Logo from "../components/design/logo";
 import Image from "next/image";
-import { useZoneDwell } from "../core/hooks/useZoneDwell";
+
 import type {
   Question,
   QuestionsResponse,
 } from "@/core/modules/questions/types";
+
 import type {
   ResultGenre,
   AnswersResponse,
 } from "@/core/modules/answers/types";
+
 import { ZONES, type Zone } from "@/core/modules/zones/types";
+
+import { useInstallationState } from "@/core/hooks/useInstallationState";
 
 const CIRCUMFERENCE = 2 * Math.PI * 20;
 
 export default function Home() {
   const [questions, setQuestions] = useState<Question[]>([]);
+
   const [currentIndex, setCurrentIndex] = useState(0);
+
   const [selectedByQuestion, setSelectedByQuestion] = useState<
     Record<string, string>
   >({});
+
   const [resultGenre, setResultGenre] = useState<ResultGenre | null>(null);
+
   const [isLoading, setIsLoading] = useState(true);
+
   const [isSubmitting, setIsSubmitting] = useState(false);
+
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const currentQuestion = questions[currentIndex];
 
-  // ↓ callback stabiliseren
+  // SERVER STATE
+  const { installationState, dwellProgress, confirmedZone } =
+    useInstallationState();
 
+  // SUBMIT ALL ANSWERS
   const submitAllAnswers = useCallback(
     async (nextSelections: Record<string, string>) => {
       try {
         setIsSubmitting(true);
+
         setErrorMessage(null);
 
         const answerOptionIds = questions.map(
@@ -43,8 +57,14 @@ export default function Home() {
 
         const response = await fetch("/api/answers", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ answerOptionIds }),
+
+          headers: {
+            "Content-Type": "application/json",
+          },
+
+          body: JSON.stringify({
+            answerOptionIds,
+          }),
         });
 
         const data = (await response.json()) as AnswersResponse & {
@@ -66,21 +86,27 @@ export default function Home() {
     },
     [questions],
   );
-  // 1. eerst handleAnswerClick
+
+  // HANDLE ANSWER CLICK
   const handleAnswerClick = useCallback(
     (answerOptionId: string) => {
-      if (!currentQuestion || isSubmitting) return;
+      if (!currentQuestion || isSubmitting) {
+        return;
+      }
 
       const nextSelections = {
         ...selectedByQuestion,
+
         [currentQuestion.id]: answerOptionId,
       };
 
       setSelectedByQuestion(nextSelections);
 
       const isLastQuestion = currentIndex === questions.length - 1;
+
       if (!isLastQuestion) {
         setCurrentIndex((previous) => previous + 1);
+
         return;
       }
 
@@ -92,36 +118,41 @@ export default function Home() {
       selectedByQuestion,
       currentIndex,
       questions.length,
+      submitAllAnswers,
     ],
   );
 
-  // 2. dan onZoneConfirmed
-  const onZoneConfirmed = useCallback(
-    (zone: Zone, zoneIndex: number) => {
-      const option = currentQuestion?.answerOptions[zoneIndex];
-      if (option) handleAnswerClick(option.id);
-    },
-    [currentQuestion, handleAnswerClick],
-  );
-
-  // 3. dan de hook
-  const { dwellingZone, dwellProgress, reset } = useZoneDwell({
-    wsUrl: "ws://localhost:3001",
-    dwellTimeMs: 2000,
-    onZoneConfirmed,
-  });
-
+  // SERVER CONFIRMED ZONE
   useEffect(() => {
-    reset();
-  }, [currentIndex, reset]);
+    if (!confirmedZone) {
+      return;
+    }
 
+    if (!currentQuestion) {
+      return;
+    }
+
+    const zoneIndex = ZONES.indexOf(confirmedZone as Zone);
+
+    const option = currentQuestion.answerOptions[zoneIndex];
+
+    if (!option) {
+      return;
+    }
+
+    handleAnswerClick(option.id);
+  }, [confirmedZone, currentQuestion, handleAnswerClick]);
+
+  // LOAD QUESTIONS
   useEffect(() => {
     const loadQuestions = async () => {
       try {
         setIsLoading(true);
+
         setErrorMessage(null);
 
         const response = await fetch("/api/questions");
+
         const data = (await response.json()) as QuestionsResponse & {
           error?: string;
         };
@@ -134,6 +165,7 @@ export default function Home() {
       } catch (error) {
         const message =
           error instanceof Error ? error.message : "Failed to load questions";
+
         setErrorMessage(message);
       } finally {
         setIsLoading(false);
@@ -143,14 +175,18 @@ export default function Home() {
     void loadQuestions();
   }, []);
 
+  // RESTART
   const restartQuiz = () => {
     setCurrentIndex(0);
+
     setSelectedByQuestion({});
+
     setResultGenre(null);
+
     setErrorMessage(null);
-    reset();
   };
 
+  // LOADING
   if (isLoading) {
     return (
       <main className="flex min-h-screen items-center justify-center p-6">
@@ -159,6 +195,7 @@ export default function Home() {
     );
   }
 
+  // ERROR
   if (errorMessage && questions.length === 0) {
     return (
       <main className="flex min-h-screen items-center justify-center p-6">
@@ -169,6 +206,7 @@ export default function Home() {
     );
   }
 
+  // RESULT
   if (resultGenre) {
     return (
       <main className="flex min-h-screen items-center justify-center p-6">
@@ -176,17 +214,21 @@ export default function Home() {
           <p className="text-sm font-medium uppercase tracking-wide text-slate-500">
             Your genre
           </p>
+
           <h1 className="mt-2 text-3xl font-semibold text-slate-900">
             {resultGenre.name}
           </h1>
+
           {resultGenre.description ? (
             <p className="mt-3 text-slate-600">{resultGenre.description}</p>
           ) : null}
+
           {resultGenre.artistReference ? (
             <p className="mt-2 text-sm text-slate-500">
               Artist reference: {resultGenre.artistReference}
             </p>
           ) : null}
+
           <button
             type="button"
             onClick={restartQuiz}
@@ -199,6 +241,7 @@ export default function Home() {
     );
   }
 
+  // NO QUESTION
   if (!currentQuestion) {
     return (
       <main className="flex min-h-screen items-center justify-center p-6">
@@ -224,7 +267,9 @@ export default function Home() {
       >
         <div
           className="h-full rounded-full bg-violet-600 transition-[width] duration-300"
-          style={{ width: `${progressPercent}%` }}
+          style={{
+            width: `${progressPercent}%`,
+          }}
         />
       </div>
 
@@ -235,11 +280,13 @@ export default function Home() {
           width={128}
           height={128}
         />
+
         <div className="px-15 py-12.5 bg-light-purple/20 rounded-3xl flex items-center justify-center">
           <h1 className="mt-3 text-4xl font-semibold text-white text-center">
             {currentQuestion.text}
           </h1>
         </div>
+
         <Image
           src={"/icons/audio-wave.svg"}
           alt="Audio wave icon"
@@ -255,9 +302,10 @@ export default function Home() {
 
         <div className="grid gap-4 md:grid-cols-2">
           {currentQuestion.answerOptions.map((option, index) => {
-            // Welke zone hoort bij deze button op basis van index?
             const zone = ZONES[index];
-            const isDwelling = dwellingZone === zone;
+
+            const isDwelling = String(installationState?.activeZone) === zone;
+
             const strokeLength = isDwelling
               ? (dwellProgress / 100) * CIRCUMFERENCE
               : 0;
@@ -292,6 +340,7 @@ export default function Home() {
                       strokeOpacity={0.15}
                       strokeWidth="3"
                     />
+
                     <circle
                       cx="24"
                       cy="24"
@@ -301,9 +350,12 @@ export default function Home() {
                       strokeWidth="3"
                       strokeLinecap="round"
                       strokeDasharray={`${strokeLength} ${CIRCUMFERENCE}`}
-                      style={{ transition: "stroke-dasharray 0.05s linear" }}
+                      style={{
+                        transition: "stroke-dasharray 0.05s linear",
+                      }}
                     />
                   </svg>
+
                   <span className="relative z-10 flex h-10 w-10 items-center justify-center rounded-full bg-blue-500 text-sm font-semibold text-white shadow-md shadow-blue-500/30">
                     {index + 1}
                   </span>
