@@ -2,12 +2,16 @@
 
 import { useEffect, useState } from "react";
 
-export type Zone = "CENTER" | "RED" | "BLUE" | "GREEN" | "YELLOW" | "NONE";
+import type { Zone } from "@/core/modules/zones/types";
+
+export type { Zone };
+
+export type InstallationZone = Zone | "CENTER" | "NONE";
 
 export type InstallationState = {
   screen: string;
 
-  activeZone: Zone;
+  activeZone: InstallationZone;
 
   currentQuestion: number;
 
@@ -24,11 +28,11 @@ type ServerMessage =
   | {
       type: "DWELL_PROGRESS";
       progress: number;
-      zone: Zone;
+      zone: InstallationZone;
     }
   | {
       type: "SELECTION_CONFIRMED";
-      zone: Zone;
+      zone: InstallationZone;
     };
 
 export function useInstallationState() {
@@ -37,7 +41,9 @@ export function useInstallationState() {
 
   const [dwellProgress, setDwellProgress] = useState(0);
 
-  const [confirmedZone, setConfirmedZone] = useState<Zone | null>(null);
+  const [confirmedZone, setConfirmedZone] = useState<InstallationZone | null>(
+    null,
+  );
 
   useEffect(() => {
     const ws = new WebSocket("ws://localhost:8080");

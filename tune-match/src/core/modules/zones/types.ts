@@ -1,13 +1,13 @@
 export const ZONE_TO_INDEX = {
-  top: 0,
-  right: 1,
-  bottom: 2,
-  left: 3,
+  RED: 0,
+  BLUE: 1,
+  GREEN: 2,
+  YELLOW: 3,
 } as const;
 
 export type Zone = keyof typeof ZONE_TO_INDEX;
 
-export const ZONES: Zone[] = ["top", "right", "bottom", "left"];
+export const ZONES: Zone[] = ["RED", "BLUE", "GREEN", "YELLOW"];
 
 export type ZoneMessage = {
   type: "zone_update";

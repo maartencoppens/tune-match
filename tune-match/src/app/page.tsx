@@ -39,13 +39,49 @@ export default function Home() {
 
   const currentQuestion = questions[currentIndex];
 
+  useEffect(() => {
+    console.log("[page] quiz state", {
+      questionsLength: questions.length,
+      currentIndex,
+      currentQuestionId: currentQuestion?.id ?? null,
+      currentQuestionText: currentQuestion?.text ?? null,
+      selectedByQuestion,
+      resultGenre,
+      isLoading,
+      isSubmitting,
+      errorMessage,
+    });
+  }, [
+    questions.length,
+    currentIndex,
+    currentQuestion,
+    selectedByQuestion,
+    resultGenre,
+    isLoading,
+    isSubmitting,
+    errorMessage,
+  ]);
+
   // SERVER STATE
   const { installationState, dwellProgress, confirmedZone } =
     useInstallationState();
 
+  useEffect(() => {
+    console.log("[page] server state", {
+      installationState,
+      dwellProgress,
+      confirmedZone,
+    });
+  }, [installationState, dwellProgress, confirmedZone]);
+
   // SUBMIT ALL ANSWERS
   const submitAllAnswers = useCallback(
     async (nextSelections: Record<string, string>) => {
+      console.log("[page] submitAllAnswers:start", {
+        nextSelections,
+        questionIds: questions.map((question) => question.id),
+      });
+
       try {
         setIsSubmitting(true);
 
@@ -71,12 +107,20 @@ export default function Home() {
           error?: string;
         };
 
+        console.log("[page] submitAllAnswers:response", {
+          ok: response.ok,
+          status: response.status,
+          data,
+        });
+
         if (!response.ok) {
           throw new Error(data.error ?? "Failed to submit answers");
         }
 
         setResultGenre(data.resultGenre);
       } catch (error) {
+        console.error("[page] submitAllAnswers:error", error);
+
         setErrorMessage(
           error instanceof Error ? error.message : "Failed to submit answers",
         );
@@ -90,7 +134,19 @@ export default function Home() {
   // HANDLE ANSWER CLICK
   const handleAnswerClick = useCallback(
     (answerOptionId: string) => {
+      console.log("[page] handleAnswerClick", {
+        answerOptionId,
+        currentQuestionId: currentQuestion?.id ?? null,
+        currentIndex,
+        isSubmitting,
+      });
+
       if (!currentQuestion || isSubmitting) {
+        console.log("[page] handleAnswerClick:ignored", {
+          hasCurrentQuestion: Boolean(currentQuestion),
+          isSubmitting,
+        });
+
         return;
       }
 
@@ -103,6 +159,11 @@ export default function Home() {
       setSelectedByQuestion(nextSelections);
 
       const isLastQuestion = currentIndex === questions.length - 1;
+
+      console.log("[page] handleAnswerClick:nextState", {
+        nextSelections,
+        isLastQuestion,
+      });
 
       if (!isLastQuestion) {
         setCurrentIndex((previous) => previous + 1);
@@ -136,7 +197,20 @@ export default function Home() {
 
     const option = currentQuestion.answerOptions[zoneIndex];
 
+    console.log("[page] confirmedZone effect", {
+      confirmedZone,
+      zoneIndex,
+      currentQuestionId: currentQuestion.id,
+      optionId: option?.id ?? null,
+    });
+
     if (!option) {
+      console.warn("[page] confirmedZone effect: no option for zone", {
+        confirmedZone,
+        zoneIndex,
+        currentQuestionId: currentQuestion.id,
+      });
+
       return;
     }
 
@@ -146,6 +220,8 @@ export default function Home() {
   // LOAD QUESTIONS
   useEffect(() => {
     const loadQuestions = async () => {
+      console.log("[page] loadQuestions:start");
+
       try {
         setIsLoading(true);
 
@@ -157,12 +233,21 @@ export default function Home() {
           error?: string;
         };
 
+        console.log("[page] loadQuestions:response", {
+          ok: response.ok,
+          status: response.status,
+          questionCount: data.questions?.length ?? 0,
+          data,
+        });
+
         if (!response.ok) {
           throw new Error(data.error ?? "Failed to load questions");
         }
 
         setQuestions(data.questions ?? []);
       } catch (error) {
+        console.error("[page] loadQuestions:error", error);
+
         const message =
           error instanceof Error ? error.message : "Failed to load questions";
 
@@ -177,6 +262,8 @@ export default function Home() {
 
   // RESTART
   const restartQuiz = () => {
+    console.log("[page] restartQuiz");
+
     setCurrentIndex(0);
 
     setSelectedByQuestion({});
@@ -304,7 +391,7 @@ export default function Home() {
           {currentQuestion.answerOptions.map((option, index) => {
             const zone = ZONES[index];
 
-            const isDwelling = String(installationState?.activeZone) === zone;
+            const isDwelling = installationState?.activeZone === zone;
 
             const strokeLength = isDwelling
               ? (dwellProgress / 100) * CIRCUMFERENCE

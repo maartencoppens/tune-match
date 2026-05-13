@@ -1,9 +1,6 @@
 import { installationState } from "../state/installation-state.js";
-
 import { broadcast } from "../websocket/broadcast.js";
-
 import { EVENTS } from "../shared/events.js";
-
 import { startDwell, stopDwell } from "../dwell/dwell.js";
 
 export function handleZoneUpdate(zone: string): void {
