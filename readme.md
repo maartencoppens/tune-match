@@ -172,7 +172,7 @@ Then type:
 ## Start tracking python env
 
 ```bash
-cd tracking
+cd /Users/maarten/Files/DEV4/dev-4-tunematch/tracking
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt

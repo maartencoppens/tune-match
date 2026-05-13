@@ -6,37 +6,34 @@ import time
 import threading
 from websocket import create_connection
 
-# ============================================
-# 1. YOLO MODEL LADEN
-# ============================================
-
 model = YOLO("yolov8n.pt")
-
-# ============================================
-# 2. CAMERA OPENEN
-# ============================================
 
 cap = cv2.VideoCapture(0, cv2.CAP_AVFOUNDATION)
 
-# ============================================
-# 3. WEBSOCKET VERBINDING
-# ============================================
+ws = None
 
-ws = create_connection("ws://localhost:8080")
+def connect_websocket():
+    global ws
+    try:
+        ws = create_connection("ws://localhost:8080")
+        print("WebSocket connected!")
+        return True
+    except Exception as e:
+        print(f"WebSocket connection failed: {e}")
+        ws = None
+        return False
+
+connect_websocket()
 
 last_sent_zone = None
 last_sent_time = 0
 
-# ============================================
-# 4. ZONES LADEN
-# ============================================
+# ZONES LADEN
 
 with open("zones.json", "r") as file:
     zones = json.load(file)
 
-# ============================================
-# 5. KLEUREN PER ZONE
-# ============================================
+# KLEUREN PER ZONE
 
 zone_colors = {
     "CENTER": (255, 255, 255),
@@ -45,10 +42,7 @@ zone_colors = {
     "GREEN": (0, 255, 0),
     "YELLOW": (0, 255, 255),
 }
-
-# ============================================
-# 6. CHECK IN WELKE ZONE PUNT ZIT
-# ============================================
+# CHECK IN WELKE ZONE PUNT ZIT
 
 def get_zone(x, y):
     for zone_name, zone in zones.items():
@@ -66,12 +60,17 @@ def get_zone(x, y):
 
     return "NONE"
 
-# ============================================
-# 7. WEBSOCKET SEND FUNCTIE
-# ============================================
+# WEBSOCKET SEND FUNCTIE
 
 def send_zone(zone):
+    global ws
     try:
+        # Try to reconnect if not connected
+        if ws is None:
+            print("WebSocket not connected, attempting reconnect...")
+            if not connect_websocket():
+                return
+
         payload = {
             "type": "ZONE_UPDATE",
             "zone": zone
@@ -82,11 +81,12 @@ def send_zone(zone):
         print("Sent:", payload)
 
     except Exception as e:
-        print("WebSocket fout:", e)
+        print(f"WebSocket error: {e}")
+        ws = None
+        print("Connection lost, will retry on next zone change")
 
-# ============================================
-# 8. MAIN LOOP
-# ============================================
+
+# MAIN LOOP
 
 while True:
 
@@ -96,21 +96,19 @@ while True:
         print("Camera frame kon niet gelezen worden.")
         break
 
-    # ========================================
     # FORCEER RESOLUTIE
-    # ========================================
 
     frame = cv2.resize(frame, (1920, 1080))
 
-    # ========================================
+
     # KLEINERE FRAME VOOR SNELLERE AI
-    # ========================================
+
 
     detection_frame = cv2.resize(frame, (1280, 720))
 
-    # ========================================
+
     # YOLO DETECTIE
-    # ========================================
+
 
     results = model(
         detection_frame,
@@ -122,9 +120,9 @@ while True:
 
     active_zone = "NONE"
 
-    # ========================================
+
     # POLYGON ZONES TEKENEN
-    # ========================================
+
 
     for zone_name, zone in zones.items():
 
@@ -150,9 +148,9 @@ while True:
             2
         )
 
-    # ========================================
+
     # PERSONEN VERWERKEN
-    # ========================================
+
 
     for result in results:
 
@@ -208,9 +206,9 @@ while True:
             # Enkel eerste persoon gebruiken
             break
 
-    # ========================================
+   
     # ACTIVE ZONE TEKST
-    # ========================================
+   
 
     cv2.putText(
         frame,
@@ -222,9 +220,9 @@ while True:
         3
     )
 
-    # ========================================
+   
     # WEBSOCKET STUREN
-    # ========================================
+   
 
     current_time = time.time()
 
@@ -242,22 +240,22 @@ while True:
         last_sent_zone = active_zone
         last_sent_time = current_time
 
-    # ========================================
+   
     # FRAME TONEN
-    # ========================================
+   
 
     cv2.imshow("YOLO Polygon Zone Tracking", frame)
 
-    # ========================================
+   
+   
     # STOPPEN MET Q
-    # ========================================
+   
 
     if cv2.waitKey(1) & 0xFF == ord("q"):
         break
 
-# ============================================
+
 # CLEANUP
-# ============================================
 
 ws.close()
 cap.release()

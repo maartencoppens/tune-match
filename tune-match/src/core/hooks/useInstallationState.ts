@@ -15,6 +15,8 @@ export type InstallationState = {
 
   currentQuestion: number;
 
+  maxQuestions: number;
+
   dwellProgress: number;
 
   selections: Zone[];
@@ -41,9 +43,14 @@ export function useInstallationState() {
 
   const [dwellProgress, setDwellProgress] = useState(0);
 
+  const [activeZoneFromDwell, setActiveZoneFromDwell] =
+    useState<InstallationZone | null>(null);
+
   const [confirmedZone, setConfirmedZone] = useState<InstallationZone | null>(
     null,
   );
+
+  const resetConfirmedZone = () => setConfirmedZone(null);
 
   useEffect(() => {
     const ws = new WebSocket("ws://localhost:8080");
@@ -54,11 +61,13 @@ export function useInstallationState() {
       switch (message.type) {
         case "INSTALLATION_STATE":
           setInstallationState(message.state);
+          setActiveZoneFromDwell(null);
 
           break;
 
         case "DWELL_PROGRESS":
           setDwellProgress(message.progress);
+          setActiveZoneFromDwell(message.zone);
 
           break;
 
@@ -77,6 +86,10 @@ export function useInstallationState() {
 
     dwellProgress,
 
+    activeZoneFromDwell,
+
     confirmedZone,
+
+    resetConfirmedZone,
   };
 }

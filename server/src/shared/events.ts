@@ -6,6 +6,8 @@ export const EVENTS = {
   DWELL_PROGRESS: "DWELL_PROGRESS",
 
   SELECTION_CONFIRMED: "SELECTION_CONFIRMED",
+
+  ANSWER_REVEALED: "ANSWER_REVEALED",
 } as const;
 
 export type Zone = "CENTER" | "RED" | "BLUE" | "GREEN" | "YELLOW" | "NONE";

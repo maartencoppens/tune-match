@@ -1,6 +1,7 @@
 import { installationState } from "../state/installation-state.js";
 import { broadcast } from "../websocket/broadcast.js";
 import { EVENTS } from "../shared/events.js";
+import { transitionToAnswerReveal } from "../state/phase-manager.js";
 
 let dwellInterval: NodeJS.Timeout | null = null;
 
@@ -27,14 +28,19 @@ export function startDwell(zone: string): void {
     if (progress >= 100) {
       stopDwell();
 
+      // Store the selected zone for this question
       installationState.selections.push(zone as any);
 
+      // Broadcast that selection is confirmed
       broadcast({
         type: EVENTS.SELECTION_CONFIRMED,
         zone,
       });
 
       console.log("SELECTION CONFIRMED:", zone);
+
+      // Transition to answer reveal phase
+      transitionToAnswerReveal();
     }
   }, 50);
 }
