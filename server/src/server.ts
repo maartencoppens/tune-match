@@ -4,6 +4,7 @@ import { routeMessage } from "./websocket/message-router.js";
 import { broadcast } from "./websocket/broadcast.js";
 import { EVENTS } from "./shared/events.js";
 import { installationState } from "./state/installation-state.js";
+import { syncDmxWithInstallationState } from "./dmx/dmxController.js";
 
 wss.on("connection", (ws) => {
   console.log("Client connected");
@@ -30,3 +31,6 @@ wss.on("connection", (ws) => {
     console.log("Client disconnected");
   });
 });
+
+// Ensure DMX reflects initial installation state at startup
+syncDmxWithInstallationState(installationState);

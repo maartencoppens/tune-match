@@ -1,6 +1,7 @@
 import { installationState, MAX_QUESTIONS } from "./installation-state.js";
 import { broadcast } from "../websocket/broadcast.js";
 import { EVENTS } from "../shared/events.js";
+import { syncDmxWithInstallationState } from "../dmx/dmxController.js";
 
 let revealTimeoutId: NodeJS.Timeout | null = null;
 
@@ -15,6 +16,7 @@ export function transitionToAnswerReveal(): void {
   installationState.dwellProgress = 0;
 
   // Broadcast the new state
+  syncDmxWithInstallationState(installationState);
   broadcast({
     type: EVENTS.INSTALLATION_STATE,
     state: installationState,
@@ -49,6 +51,7 @@ export function transitionToNextQuestion(): void {
   installationState.dwellProgress = 0;
 
   // Broadcast the new state
+  syncDmxWithInstallationState(installationState);
   broadcast({
     type: EVENTS.INSTALLATION_STATE,
     state: installationState,
