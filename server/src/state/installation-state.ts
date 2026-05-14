@@ -8,7 +8,8 @@ export type Screen =
   | "question"
   | "answer_reveal"
   | "result"
-  | "photo";
+  | "photo"
+  | "reset";
 
 export const installationState = {
   screen: "question" as Screen,

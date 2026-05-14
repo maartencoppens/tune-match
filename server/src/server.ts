@@ -5,6 +5,7 @@ import { broadcast } from "./websocket/broadcast.js";
 import { EVENTS } from "./shared/events.js";
 import { installationState } from "./state/installation-state.js";
 import { syncDmxWithInstallationState } from "./dmx/dmxController.js";
+import { playSoundForScreen } from "./audio/audioController.js";
 
 wss.on("connection", (ws) => {
   console.log("Client connected");
@@ -33,4 +34,5 @@ wss.on("connection", (ws) => {
 });
 
 // Ensure DMX reflects initial installation state at startup
+playSoundForScreen(installationState.screen);
 syncDmxWithInstallationState(installationState);
