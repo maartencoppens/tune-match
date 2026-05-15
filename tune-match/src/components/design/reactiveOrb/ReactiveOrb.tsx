@@ -281,7 +281,7 @@ export default function ReactiveOrb() {
 
       <div className="orb-vignette" />
 
-      <audio ref={audioRef} src="/audio/background.mp3" loop playsInline />
+      
     </div>
   );
 }

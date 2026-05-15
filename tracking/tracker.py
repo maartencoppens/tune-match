@@ -2,13 +2,51 @@ from ultralytics import YOLO
 import cv2
 import json
 import numpy as np
+import platform
 import time
 import threading
 from websocket import create_connection
 
 model = YOLO("yolov8n.pt")
 
-cap = cv2.VideoCapture(0, cv2.CAP_AVFOUNDATION)
+def open_camera():
+    system_name = platform.system()
+
+    if system_name == "Windows":
+        candidates = [
+            (0, cv2.CAP_DSHOW),
+            (0, cv2.CAP_MSMF),
+            (0, None),
+        ]
+    elif system_name == "Darwin":
+        candidates = [
+            (0, cv2.CAP_AVFOUNDATION),
+            (0, None),
+        ]
+    else:
+        candidates = [
+            (0, None),
+        ]
+
+    for camera_index, backend in candidates:
+        if backend is None:
+            camera = cv2.VideoCapture(camera_index)
+        else:
+            camera = cv2.VideoCapture(camera_index, backend)
+
+        if camera.isOpened():
+            print(f"Camera opened on {system_name} using backend {backend if backend is not None else 'default'}")
+            return camera
+
+        camera.release()
+
+    return None
+
+
+cap = open_camera()
+
+if cap is None:
+    raise RuntimeError("Could not open the camera. Check permissions, camera index, or if another app is using it.")
 
 ws = None
 
@@ -257,6 +295,7 @@ while True:
 
 # CLEANUP
 
-ws.close()
+if ws is not None:
+    ws.close()
 cap.release()
 cv2.destroyAllWindows()

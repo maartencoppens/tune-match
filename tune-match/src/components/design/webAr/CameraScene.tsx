@@ -50,7 +50,6 @@ export default function CameraScene({
         >
           <a-camera
             position="0 0 0"
-            camera="fov: 80"
             look-controls="enabled: false"
             wasd-controls="enabled: false"
           ></a-camera>

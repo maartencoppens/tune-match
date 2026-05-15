@@ -12,7 +12,7 @@ export type Screen =
   | "reset";
 
 export const installationState = {
-  screen: "question" as Screen,
+  screen: "photo" as Screen,
 
   activeZone: "NONE" as Zone,
 

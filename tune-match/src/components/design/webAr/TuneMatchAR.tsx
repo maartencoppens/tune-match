@@ -1,5 +1,5 @@
 "use client";
-import genreVibes from "../../../data/genreVibes.json";
+import genreVibes from "../../../../data/genreVibes.json";
 import { useEffect, useRef, useState } from "react";
 import CameraScene from "./CameraScene";
 
