@@ -1,0 +1,27 @@
+{
+  "pop": {
+    "title": "POP STAR ENERGY ✨",
+    "description": "Bright, catchy and impossible to ignore",
+    "artists": ["Dua Lipa", "Billie Eilish", "Ariana Grande", "Harry Styles"]
+  },
+  "rock": {
+    "title": "ROCK REBEL ⚡",
+    "description": "Loud, bold and built for an anthem",
+    "artists": ["Green Day", "Nirvana", "Arctic Monkeys", "Foo Fighters"]
+  },
+  "hiphop": {
+    "title": "HIPHOP FLOW 🔥",
+    "description": "Confident, smooth and full of rhythm",
+    "artists": ["Kendrick Lamar", "Drake", "Travis Scott", "Eminem"]
+  },
+  "techno": {
+    "title": "TECHNO NIGHTRIDER 🌀",
+    "description": "Fast, hypnotic and made for the crowd",
+    "artists": ["Charlotte de Witte", "Amelie Lens", "Peggy Gou", "Anyma"]
+  },
+  "metal": {
+    "title": "METAL SOUL 🤘",
+    "description": "Heavy, intense and unstoppable",
+    "artists": ["Metallica", "Slipknot", "Bring Me The Horizon", "Rammstein"]
+  }
+}
