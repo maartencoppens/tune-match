@@ -1,8 +1,11 @@
 import Logo from "../components/design/logo";
-
+import ReactiveOrb from "@/components/reactiveOrb/ReactiveOrb";
+import TuneMatchAR from "@/components/webAr/TuneMatchAR";
 export default function HomePage() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center gap-8 p-6 text-center">
+      <ReactiveOrb />
+     
       <Logo className="mx-auto" />
 
       <div className="max-w-md">
