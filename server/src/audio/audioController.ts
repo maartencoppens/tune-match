@@ -8,18 +8,30 @@ const audio = player();
 
 const DEBUG_AUDIO = true;
 
-const soundByScreen: Record<Screen, string | null> = {
+type AudioGroup = "idle" | "intro" | "quiz" | "result" | "none";
+
+const audioGroupByScreen: Record<Screen, AudioGroup> = {
+  idle: "idle",
+  intro: "intro",
+
+  // zelfde muziek blijft spelen
+  question: "quiz",
+  answer_reveal: "quiz",
+
+  result: "result",
+  photo: "none",
+};
+
+const soundByAudioGroup: Record<AudioGroup, string | null> = {
   idle: "idle.mp3",
   intro: "intro.mp3",
-  question: "question.mp3",
+  quiz: "question.mp3",
   result: "result.mp3",
-  photo: null,
-  answer_reveal: null,
-  reset: "reset.mp3",
+  none: null,
 };
 
 let currentProcess: ReturnType<typeof audio.play> | null = null;
-let currentScreen: Screen | null = null;
+let currentAudioGroup: AudioGroup | null = null;
 
 function logAudio(message: string) {
   if (DEBUG_AUDIO) console.log(`[AUDIO] ${message}`);
@@ -39,22 +51,29 @@ function getSoundPath(filename: string) {
 }
 
 export function playSoundForScreen(screen: Screen) {
-  if (screen === currentScreen) return;
+  const nextAudioGroup = audioGroupByScreen[screen];
 
-  currentScreen = screen;
+  // Belangrijk:
+  // question -> answer_reveal -> question blijft dezelfde audio group.
+  // Dus muziek wordt niet opnieuw gestart.
+  if (nextAudioGroup === currentAudioGroup) {
+    return;
+  }
 
-  const soundFile = soundByScreen[screen];
+  currentAudioGroup = nextAudioGroup;
+
+  const soundFile = soundByAudioGroup[nextAudioGroup];
 
   stopCurrentSound();
 
   if (!soundFile) {
-    logAudio(`No sound for screen: ${screen}`);
+    logAudio(`No sound for audio group: ${nextAudioGroup}`);
     return;
   }
 
   const soundPath = getSoundPath(soundFile);
 
-  logAudio(`Playing ${soundFile} for screen: ${screen}`);
+  logAudio(`Playing ${soundFile} for audio group: ${nextAudioGroup}`);
 
   currentProcess = audio.play(soundPath, (err) => {
     if (err) {
@@ -76,6 +95,6 @@ export function playSelectionSound() {
 }
 
 export function stopAllAudio() {
-  currentScreen = null;
+  currentAudioGroup = null;
   stopCurrentSound();
 }

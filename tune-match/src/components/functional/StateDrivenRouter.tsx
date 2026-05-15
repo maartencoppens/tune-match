@@ -14,6 +14,8 @@ function screenToPath(screen: string | undefined) {
       return "/quiz/reveal";
     case "result":
       return "/result";
+    case "photo":
+      return "/photo";
     default:
       return "/";
   }

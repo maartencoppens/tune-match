@@ -8,11 +8,10 @@ export type Screen =
   | "question"
   | "answer_reveal"
   | "result"
-  | "photo"
-  | "reset";
+  | "photo";
 
 export const installationState = {
-  screen: "question" as Screen,
+  screen: "idle" as Screen,
 
   activeZone: "NONE" as Zone,
 
