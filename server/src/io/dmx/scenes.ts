@@ -43,120 +43,6 @@ export const dmxScenes = {
     return sendDmx("BLACKOUT", createBlackoutFrame());
   },
 
-  idleAmbient() {
-    return sendDmx("IDLE_AMBIENT", {
-      1: 80,
-      2: 0,
-      3: 40,
-      4: 120,
-      5: 0,
-      6: 0,
-      7: 40,
-      8: 80,
-      9: 120,
-      10: 0,
-      11: 0,
-      12: 30,
-      13: 80,
-      14: 120,
-      15: 0,
-      20: 0,
-      21: 0,
-      22: 0,
-      23: 0,
-      24: 0,
-      25: 0,
-      26: 0,
-      35: 120,
-      36: 120,
-      37: 120,
-      38: 120,
-      39: 120,
-      40: 0,
-      41: 0,
-      50: 120,
-      51: 0,
-      52: 0,
-      53: 0,
-    });
-  },
-
-  introGlow() {
-    return sendDmx("INTRO_GLOW", {
-      1: 150,
-      2: 30,
-      3: 80,
-      4: 180,
-      5: 0,
-      6: 30,
-      7: 80,
-      8: 180,
-      9: 0,
-      10: 30,
-      11: 80,
-      12: 180,
-      13: 30,
-      14: 80,
-      15: 180,
-      20: 0,
-      21: 0,
-      22: 0,
-      23: 0,
-      24: 0,
-      25: 0,
-      26: 0,
-      35: 180,
-      36: 180,
-      37: 180,
-      38: 180,
-      39: 180,
-      40: 0,
-      41: 0,
-      50: 180,
-      51: 0,
-      52: 0,
-      53: 0,
-    });
-  },
-
-  questionBlue() {
-    return sendDmx("QUESTION_BLUE", {
-      1: 120,
-      2: 0,
-      3: 20,
-      4: 180,
-      5: 0,
-      6: 0,
-      7: 20,
-      8: 180,
-      9: 0,
-      10: 0,
-      11: 20,
-      12: 180,
-      13: 0,
-      14: 20,
-      15: 180,
-      20: 0,
-      21: 0,
-      22: 0,
-      23: 0,
-      24: 0,
-      25: 0,
-      26: 0,
-      35: 180,
-      36: 180,
-      37: 180,
-      38: 180,
-      39: 180,
-      40: 0,
-      41: 0,
-      50: 180,
-      51: 0,
-      52: 0,
-      53: 0,
-    });
-  },
-
   zoneRedPulse() {
     return sendDmx("ZONE_RED_PULSE", {
       1: 255,
@@ -195,61 +81,112 @@ export const dmxScenes = {
     });
   },
 
-  selectionConfirmed() {
-    return sendDmx("SELECTION_CONFIRMED", {
+  idleAmbient() {
+    return sendDmx("IDLE_AMBIENT", {
+      // Spot bar
       1: 255,
-      2: 255,
-      3: 255,
-      4: 255,
-      5: 0,
-      6: 255,
-      7: 255,
-      8: 255,
+      2: 0,
+      3: 0,
+      4: 150,
+      5: 255,
+      6: 133,
+      7: 0,
+      8: 55,
       9: 0,
       10: 255,
-      11: 255,
-      12: 255,
-      13: 255,
+      11: 0,
+      12: 0,
+      13: 150,
       14: 255,
-      15: 255,
-      20: 255,
-      21: 255,
-      22: 180,
-      23: 255,
-      24: 180,
-      25: 255,
+      15: 0,
+
+      // Laser
+      20: 0,
+      21: 0,
+      22: 0,
+      23: 0,
+      24: 255,
+      25: 6,
       26: 0,
+
+      // Small blacklight
       35: 255,
       36: 255,
       37: 255,
       38: 255,
       39: 255,
-      40: 220,
-      41: 180,
+      40: 0,
+      41: 255,
+
+      // Big blacklight
       50: 255,
       51: 0,
-      52: 180,
+      52: 15,
       53: 0,
     });
   },
 
-  resultClimax() {
-    return sendDmx("RESULT_CLIMAX", {
-      1: 255,
-      2: 255,
-      3: 80,
-      4: 200,
-      5: 255,
-      6: 80,
-      7: 200,
+  introGlow() {
+    return sendDmx("INTRO_GLOW", {
+      // Spot bar
+      // Rustige color fade via ch8 (255 ↔️ 95)
+      1: 0,
+      2: 0,
+      3: 0,
+      4: 0,
+      5: 0,
+      6: 255,
+      7: 0,
       8: 255,
-      9: 200,
-      10: 255,
-      11: 80,
-      12: 255,
-      13: 255,
-      14: 255,
-      15: 255,
+      9: 0,
+      10: 0,
+
+      // Laser
+      // Rustige stippen over muur
+      20: 0,
+      21: 255,
+      22: 255,
+      23: 0,
+      24: 5,
+      25: 15,
+      26: 0,
+
+      // Small blacklight
+      // Uit
+      35: 0,
+      36: 0,
+      37: 0,
+      38: 0,
+      39: 0,
+      40: 0,
+      41: 0,
+
+      // Big blacklight
+      // Gewoon aan
+      50: 255,
+      51: 0,
+      52: 15,
+      53: 0,
+    });
+  },
+
+  questionIntro() {
+    return sendDmx("QUESTION_INTRO", {
+      // Spot bar
+      // 1 vaste kleur
+      1: 0,
+      2: 0,
+      3: 0,
+      4: 0,
+      5: 0,
+      6: 255,
+      7: 0,
+      8: 255,
+      9: 0,
+      10: 0,
+
+      // Laser
+      // Heel druk en snel
       20: 255,
       21: 255,
       22: 255,
@@ -257,55 +194,198 @@ export const dmxScenes = {
       24: 255,
       25: 255,
       26: 255,
+      27: 255,
+
+      // Small blacklight
+      // Flikkeren
       35: 255,
       36: 255,
       37: 255,
       38: 255,
       39: 255,
-      40: 200,
+      40: 255,
       41: 255,
+      42: 255,
+      43: 255,
+
+      // Big blacklight
+      // Flikkeren
+      50: 255,
+      51: 255,
+      52: 255,
+    });
+  },
+
+  questionMain() {
+    return sendDmx("QUESTION_MAIN", {
+      // Spot bar
+      // Pulserende stipjes / rustige verandering
+      1: 130,
+      2: 130,
+      3: 130,
+      4: 130,
+      5: 10,
+      6: 255,
+      7: 0,
+      8: 255,
+
+      // Laser
+      // Rustige blauw/groene patronen
+      20: 0,
+      21: 0,
+      22: 0,
+      23: 100,
+      24: 255,
+      25: 15,
+
+      // Small blacklight
+      // Uit
+      35: 0,
+      36: 0,
+      37: 0,
+      38: 0,
+      39: 0,
+      40: 0,
+      41: 0,
+      42: 0,
+      43: 0,
+
+      // Big blacklight
+      // Uit / heel lichte flicker
+      50: 0,
+      51: 0,
+      52: 5,
+    });
+  },
+
+  selectionConfirmed() {
+    return sendDmx("SELECTION_CONFIRMED", {
+    // Spot bar
+      // 1 vaste kleur
+      1: 0,
+      2: 0,
+      3: 0,
+      4: 0,
+      5: 0,
+      6: 255,
+      7: 0,
+      8: 255,
+      9: 0,
+      10: 0,
+
+      // Laser
+      // Heel druk en snel
+      20: 255,
+      21: 255,
+      22: 255,
+      23: 255,
+      24: 255,
+      25: 255,
+      26: 255,
+      27: 255,
+
+      // Small blacklight
+      // Flikkeren
+      35: 255,
+      36: 255,
+      37: 255,
+      38: 255,
+      39: 255,
+      40: 255,
+      41: 255,
+      42: 255,
+      43: 255,
+
+      // Big blacklight
+      // Flikkeren
+      50: 255,
+      51: 255,
+      52: 255,
+    });
+  },
+
+  resultClimax() {
+    return sendDmx("RESULT_CLIMAX", {
+      // Spot bar
+      // Rustige kleurverandering via ch8
+      1: 0,
+      2: 0,
+      3: 0,
+      4: 0,
+      5: 0,
+      6: 255,
+      7: 0,
+      8: 255,
+      9: 0,
+      10: 0,
+
+      // Laser
+      // Rustige stippen over muur
+      20: 0,
+      21: 255,
+      22: 255,
+      23: 0,
+      24: 0,
+      25: 255,
+
+      // Small blacklight
+      // Pulseren
+      35: 255,
+      36: 255,
+      37: 255,
+      38: 255,
+      39: 255,
+      40: 255,
+      41: 167,
+      42: 255,
+      43: 255,
+
+      // Big blacklight
+      // Beginnen flikkeren
       50: 255,
       51: 0,
-      52: 255,
+      52: 15,
       53: 0,
     });
   },
 
   photoMoment() {
     return sendDmx("PHOTO_MOMENT", {
-      1: 180,
-      2: 180,
-      3: 120,
+      // Spot bar
+      // Beweging alle kleuren
+      1: 255,
+      2: 255,
+      3: 255,
       4: 255,
-      5: 0,
-      6: 180,
-      7: 120,
+      5: 95,
+      6: 255,
+      7: 0,
       8: 255,
-      9: 0,
-      10: 180,
-      11: 120,
-      12: 255,
-      13: 180,
-      14: 120,
-      15: 255,
-      20: 0,
+
+      // Laser
+      // Alleen lijnen/tekens die door elkaar vloeien
+      20: 255,
       21: 0,
       22: 0,
-      23: 0,
-      24: 0,
-      25: 0,
-      26: 0,
-      35: 120,
-      36: 120,
-      37: 120,
-      38: 120,
-      39: 120,
-      40: 0,
+      23: 255,
+      24: 255,
+      25: 35,
+
+      // Small blacklight
+      // Snel flikkeren
+      35: 255,
+      36: 255,
+      37: 255,
+      38: 255,
+      39: 255,
+      40: 155,
       41: 0,
-      50: 120,
-      51: 0,
-      52: 0,
-      53: 0,
+
+      // Big blacklight
+      // Rustig flikkeren
+      50: 30,
+      51: 180,
+      52: 15,
     });
   },
 };
