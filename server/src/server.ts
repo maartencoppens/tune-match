@@ -1,16 +1,12 @@
-import { wss } from "./websocket/websocket-server.js";
-
-import { routeMessage } from "./websocket/message-router.js";
-import { broadcast } from "./websocket/broadcast.js";
+import { wss } from "./io/websocket/websocket-server.js";
+import { routeMessage } from "./installation/message-router.js";
 import { EVENTS } from "./shared/events.js";
-import { installationState } from "./state/installation-state.js";
-import { syncDmxWithInstallationState } from "./dmx/dmxController.js";
-import { playSoundForScreen } from "./audio/audioController.js";
+import { installationState } from "./installation/installation-state.js";
+import { publishInstallationState } from "./installation/publish-state.js";
 
 wss.on("connection", (ws) => {
   console.log("Client connected");
 
-  // Send current state to newly connected client
   ws.send(
     JSON.stringify({
       type: EVENTS.INSTALLATION_STATE,
@@ -33,6 +29,4 @@ wss.on("connection", (ws) => {
   });
 });
 
-// Ensure DMX reflects initial installation state at startup
-playSoundForScreen(installationState.screen);
-syncDmxWithInstallationState(installationState);
+publishInstallationState();

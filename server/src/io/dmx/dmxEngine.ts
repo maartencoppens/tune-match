@@ -1,5 +1,3 @@
-// dmx/dmxEngine.ts
-
 import DMX from "dmx";
 
 const dmx = new DMX();
