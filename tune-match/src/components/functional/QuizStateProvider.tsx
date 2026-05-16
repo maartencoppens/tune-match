@@ -19,6 +19,8 @@ import type {
 } from "@/core/modules/questions/types";
 import { ZONES, type Zone } from "@/core/modules/zones/types";
 
+const RESULT_GENRE_STORAGE_KEY = "tunematch_result_genre";
+
 type QuizStateContextValue = {
   questions: Question[];
   selectedByQuestion: Record<string, string>;
@@ -69,6 +71,46 @@ export default function QuizStateProvider({
 
   const currentIndex = installationState?.currentQuestion ?? 0;
   const currentQuestion = questions[currentIndex];
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const storedResultGenre = window.sessionStorage.getItem(
+      RESULT_GENRE_STORAGE_KEY,
+    );
+
+    if (!storedResultGenre) {
+      return;
+    }
+
+    try {
+      const parsed = JSON.parse(storedResultGenre) as ResultGenre;
+
+      if (parsed?.id && parsed?.name) {
+        setResultGenre(parsed);
+      }
+    } catch {
+      window.sessionStorage.removeItem(RESULT_GENRE_STORAGE_KEY);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    if (!resultGenre) {
+      window.sessionStorage.removeItem(RESULT_GENRE_STORAGE_KEY);
+      return;
+    }
+
+    window.sessionStorage.setItem(
+      RESULT_GENRE_STORAGE_KEY,
+      JSON.stringify(resultGenre),
+    );
+  }, [resultGenre]);
 
   useEffect(() => {
     const loadQuestions = async () => {
@@ -219,6 +261,10 @@ export default function QuizStateProvider({
     setSelectedByQuestion({});
     setResultGenre(null);
     setErrorMessage(null);
+
+    if (typeof window !== "undefined") {
+      window.sessionStorage.removeItem(RESULT_GENRE_STORAGE_KEY);
+    }
   };
 
   const progressPercent =
