@@ -1,6 +1,7 @@
 "use client";
 import genreVibes from "../../../../data/genreVibes.json";
 import { useEffect, useRef, useState } from "react";
+import { QRCodeSVG } from "qrcode.react";
 import { useQuizState } from "@/components/functional/QuizStateProvider";
 import CameraScene from "./CameraScene";
 
@@ -135,6 +136,7 @@ export default function TuneMatchAR() {
   const [isSearching, setIsSearching] = useState(false);
   const [countdown, setCountdown] = useState<number | null>(null);
   const [photoUrl, setPhotoUrl] = useState("");
+  const [photoDownloadUrl, setPhotoDownloadUrl] = useState("");
   const { resultGenre } = useQuizState();
 
   const selectedGenre = mapQuizGenreToVibeGenre(resultGenre?.name);
@@ -373,7 +375,7 @@ export default function TuneMatchAR() {
 
       const dataUrl = canvas.toDataURL("image/png");
 
-      const response = await fetch("/api/upload-photo", {
+      const response = await fetch("/api/uploadPhoto", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -388,6 +390,7 @@ export default function TuneMatchAR() {
       }
 
       setPhotoUrl(data.imageUrl);
+      setPhotoDownloadUrl(data.downloadUrl ?? data.imageUrl);
     } catch (error) {
       console.error("Screenshot/upload fout:", error);
       alert("Screenshot maken is mislukt. Check de console.");
@@ -433,6 +436,7 @@ export default function TuneMatchAR() {
 
     setIsSearching(true);
     setPhotoUrl("");
+    setPhotoDownloadUrl("");
 
     if (audioRef.current) {
       audioRef.current.pause();
@@ -538,11 +542,17 @@ export default function TuneMatchAR() {
 
           <img src={photoUrl} alt="TuneMatch screenshot" />
 
-          <a href={photoUrl} target="_blank">
+          <a
+            href={photoDownloadUrl || photoUrl}
+            target="_blank"
+            rel="noreferrer"
+          >
             Open Photo
           </a>
 
-          <div className="qr-wrapper"></div>
+          <div className="qr-wrapper">
+            <QRCodeSVG value={photoDownloadUrl || photoUrl} size={160} />
+          </div>
         </div>
       )}
     </main>

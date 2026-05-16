@@ -22,8 +22,15 @@ export async function POST(request: Request) {
       folder: "tunematch-photos",
     });
 
+    const downloadUrl = cloudinary.url(uploadResult.public_id, {
+      secure: true,
+      flags: "attachment",
+      resource_type: "image",
+    });
+
     return NextResponse.json({
       imageUrl: uploadResult.secure_url,
+      downloadUrl,
       publicId: uploadResult.public_id,
     });
   } catch (error) {
