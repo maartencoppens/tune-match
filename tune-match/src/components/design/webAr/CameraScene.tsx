@@ -1,9 +1,14 @@
 "use client";
 
+import { useEffect, useRef } from "react";
+
 type CameraSceneProps = {
-  arReady: boolean;
+  scriptsReady: boolean;
+  cameraLive: boolean;
   countdown: number | null;
   cameraBoxRef: React.RefObject<HTMLDivElement | null>;
+  onCameraLive: () => void;
+  onCameraError: (message: string) => void;
   cardLabelRef: any;
   cardTitleRef: any;
   cardSubtitleRef: any;
@@ -11,20 +16,78 @@ type CameraSceneProps = {
   cardCoverRef: any;
 };
 
+function attachMindarVideoToBox(
+  box: HTMLDivElement,
+  canvas: HTMLCanvasElement | null,
+) {
+  document.querySelectorAll("video").forEach((video) => {
+    if (!box.contains(video)) {
+      video.style.objectFit = "cover";
+      box.prepend(video);
+    }
+  });
+
+  if (canvas && !box.contains(canvas)) {
+    box.appendChild(canvas);
+  }
+}
+
 export default function CameraScene({
-  arReady,
+  scriptsReady,
+  cameraLive,
   countdown,
   cameraBoxRef,
+  onCameraLive,
+  onCameraError,
   cardLabelRef,
   cardTitleRef,
   cardSubtitleRef,
   cardDescriptionRef,
   cardCoverRef,
 }: CameraSceneProps) {
+  const sceneRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    const scene = sceneRef.current;
+    if (!scene || !scriptsReady) return;
+
+    const handleReady = () => {
+      const box = cameraBoxRef.current;
+      const canvas = scene.querySelector(
+        "canvas.a-canvas",
+      ) as HTMLCanvasElement | null;
+
+      if (box) {
+        attachMindarVideoToBox(box, canvas);
+      }
+
+      onCameraLive();
+    };
+
+    const handleError = (event: Event) => {
+      const detail = (event as CustomEvent)?.detail;
+      onCameraError(
+        typeof detail === "string"
+          ? detail
+          : "Camera kon niet gestart worden. Check permissies en sluit andere camera-apps.",
+      );
+    };
+
+    scene.addEventListener("arReady", handleReady);
+    scene.addEventListener("arError", handleError);
+
+    return () => {
+      scene.removeEventListener("arReady", handleReady);
+      scene.removeEventListener("arError", handleError);
+    };
+  }, [scriptsReady, cameraBoxRef, onCameraLive, onCameraError]);
+
+  const showLoading = !cameraLive;
+
   return (
     <div
       ref={cameraBoxRef}
-      className="relative mx-auto mt-6 h-[375px] w-[500px] max-w-full overflow-hidden rounded-3xl border border-white/20 bg-black shadow-2xl"
+      className="mindar-camera-box relative mx-auto mt-6 h-[375px] w-[500px] max-w-full overflow-hidden rounded-3xl border border-white/20 bg-black shadow-2xl"
     >
       {countdown && (
         <div className="absolute inset-0 z-50 grid place-items-center bg-black/30 text-8xl font-black text-white">
@@ -32,23 +95,25 @@ export default function CameraScene({
         </div>
       )}
 
-      {!arReady && (
-        <div className="absolute inset-0 grid place-items-center text-sm text-white/70">
-          WebAR wordt geladen...
+      {showLoading && (
+        <div className="absolute inset-0 z-40 grid place-items-center text-sm text-white/70">
+          {scriptsReady ? "Camera starten..." : "WebAR wordt geladen..."}
         </div>
       )}
 
-      {arReady && (
+      {scriptsReady && (
         <a-scene
-          mindar-face=""
+          ref={sceneRef}
+          mindar-face="uiLoading: no; uiScanning: no; uiError: no"
           embedded=""
           color-space="sRGB"
-          renderer="colorManagement: true; preserveDrawingBuffer: true"
+          renderer="colorManagement: true"
           vr-mode-ui="enabled: false"
           device-orientation-permission-ui="enabled: false"
-          class="h-[375px] w-[500px]"
+          class="absolute inset-0 h-full w-full"
         >
           <a-camera
+            active="false"
             position="0 0 0"
             look-controls="enabled: false"
             wasd-controls="enabled: false"

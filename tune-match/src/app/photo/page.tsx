@@ -1,7 +1,5 @@
-"use client";
-
-import TuneMatchAR from "@/components/design/webAr/TuneMatchAR";
+import TuneMatchARClient from "@/components/design/webAr/TuneMatchARClient";
 
 export default function PhotoPage() {
-  return <TuneMatchAR />;
+  return <TuneMatchARClient />;
 }

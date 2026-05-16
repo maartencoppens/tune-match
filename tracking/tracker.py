@@ -9,23 +9,26 @@ from websocket import create_connection
 
 model = YOLO("yolov8n.pt")
 
+CAMERA_INDEX = 0
+
+
 def open_camera():
     system_name = platform.system()
 
     if system_name == "Windows":
         candidates = [
-            (0, cv2.CAP_DSHOW),
-            (0, cv2.CAP_MSMF),
-            (0, None),
+            (CAMERA_INDEX, cv2.CAP_DSHOW),
+            (CAMERA_INDEX, cv2.CAP_MSMF),
+            (CAMERA_INDEX, None),
         ]
     elif system_name == "Darwin":
         candidates = [
-            (0, cv2.CAP_AVFOUNDATION),
-            (0, None),
+            (CAMERA_INDEX, cv2.CAP_AVFOUNDATION),
+            (CAMERA_INDEX, None),
         ]
     else:
         candidates = [
-            (0, None),
+            (CAMERA_INDEX, None),
         ]
 
     for camera_index, backend in candidates:
@@ -34,10 +37,29 @@ def open_camera():
         else:
             camera = cv2.VideoCapture(camera_index, backend)
 
-        if camera.isOpened():
-            print(f"Camera opened on {system_name} using backend {backend if backend is not None else 'default'}")
+        if not camera.isOpened():
+            camera.release()
+            continue
+
+        # Some indices open but never deliver frames (wrong device / busy camera).
+        warmup_ok = False
+        for _ in range(15):
+            ok, frame = camera.read()
+            if ok and frame is not None and frame.size > 0:
+                warmup_ok = True
+                break
+
+        if warmup_ok:
+            print(
+                f"Camera {camera_index} opened on {system_name} "
+                f"using backend {backend if backend is not None else 'default'}"
+            )
             return camera
 
+        print(
+            f"Camera {camera_index} opened but no frames "
+            f"(backend {backend if backend is not None else 'default'})"
+        )
         camera.release()
 
     return None

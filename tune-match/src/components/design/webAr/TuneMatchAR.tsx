@@ -49,9 +49,36 @@ function loadImage(src: string) {
   });
 }
 
+async function ensureCameraPermission() {
+  if (!navigator.mediaDevices?.getUserMedia) {
+    throw new Error("Camera wordt niet ondersteund in deze browser.");
+  }
+
+  const stream = await navigator.mediaDevices.getUserMedia({
+    video: { facingMode: "user", width: { ideal: 1280 }, height: { ideal: 720 } },
+    audio: false,
+  });
+
+  stream.getTracks().forEach((track) => track.stop());
+}
+
+function stopMindarCamera() {
+  document.querySelectorAll("video").forEach((video) => {
+    const mediaStream = video.srcObject as MediaStream | null;
+    mediaStream?.getTracks().forEach((track) => track.stop());
+    video.srcObject = null;
+  });
+
+  const scene = document.querySelector("a-scene");
+  const mindarSystem = (scene as any)?.systems?.["mindar-face-system"];
+  mindarSystem?.stop?.();
+}
+
 export default function TuneMatchAR() {
   const [genre, setGenre] = useState("");
-  const [arReady, setArReady] = useState(false);
+  const [scriptsReady, setScriptsReady] = useState(false);
+  const [cameraLive, setCameraLive] = useState(false);
+  const [cameraError, setCameraError] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const [countdown, setCountdown] = useState<number | null>(null);
   const [photoUrl, setPhotoUrl] = useState("");
@@ -112,8 +139,17 @@ export default function TuneMatchAR() {
   }, []);
 
   useEffect(() => {
+    return () => {
+      stopMindarCamera();
+    };
+  }, []);
+
+  useEffect(() => {
     async function setupAR() {
       try {
+        setCameraError("");
+        await ensureCameraPermission();
+
         // laad A-Frame
         await loadScript("https://aframe.io/releases/1.5.0/aframe.min.js");
 
@@ -144,9 +180,14 @@ export default function TuneMatchAR() {
         // kleine extra delay
         await new Promise((resolve) => setTimeout(resolve, 300));
 
-        setArReady(true);
+        setScriptsReady(true);
       } catch (error) {
         console.error(error);
+        setCameraError(
+          error instanceof Error
+            ? error.message
+            : "WebAR kon niet starten. Sta camera-toegang toe.",
+        );
       }
     }
 
@@ -175,7 +216,9 @@ export default function TuneMatchAR() {
 
   async function takeScreenshot(dataForPhoto: PhotoData) {
     try {
-      const video = document.querySelector("video") as HTMLVideoElement | null;
+      const video =
+        (cameraBoxRef.current?.querySelector("video") as HTMLVideoElement | null) ??
+        (document.querySelector("video") as HTMLVideoElement | null);
 
       if (!video) {
         throw new Error("Geen camera video gevonden");
@@ -401,10 +444,17 @@ export default function TuneMatchAR() {
 
       <audio ref={audioRef} controls />
 
+      {cameraError ? (
+        <p className="mt-4 text-center text-sm text-red-400">{cameraError}</p>
+      ) : null}
+
       <CameraScene
-        arReady={arReady}
+        scriptsReady={scriptsReady}
+        cameraLive={cameraLive}
         countdown={countdown}
         cameraBoxRef={cameraBoxRef}
+        onCameraLive={() => setCameraLive(true)}
+        onCameraError={(message) => setCameraError(message)}
         cardLabelRef={cardLabelRef}
         cardTitleRef={cardTitleRef}
         cardSubtitleRef={cardSubtitleRef}

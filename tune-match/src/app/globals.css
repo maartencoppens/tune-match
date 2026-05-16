@@ -51,4 +51,27 @@ body {
   pointer-events: none;
 }
 
+/* MindAR injects <video> on body; keep feed visible inside the preview box */
+.mindar-camera-box {
+  position: relative;
+}
+
+.mindar-camera-box video,
+body:has(.mindar-camera-box) > video {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  z-index: 0 !important;
+}
+
+.mindar-camera-box canvas.a-canvas {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  z-index: 1 !important;
+}
+
 
