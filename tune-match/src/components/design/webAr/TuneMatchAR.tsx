@@ -3,7 +3,6 @@ import genreVibes from "../../../../data/genreVibes.json";
 import { useEffect, useRef, useState } from "react";
 import CameraScene from "./CameraScene";
 
-
 type Genre = keyof typeof genreVibes;
 
 type PhotoData = {
@@ -115,15 +114,35 @@ export default function TuneMatchAR() {
   useEffect(() => {
     async function setupAR() {
       try {
+        // laad A-Frame
         await loadScript("https://aframe.io/releases/1.5.0/aframe.min.js");
 
-        if (!window.AFRAME) {
-          throw new Error("A-Frame is niet beschikbaar");
-        }
+        // wacht écht tot window.AFRAME bestaat
+        await new Promise<void>((resolve, reject) => {
+          let tries = 0;
 
+          const interval = setInterval(() => {
+            if (window.AFRAME) {
+              clearInterval(interval);
+              resolve();
+            }
+
+            tries++;
+
+            if (tries > 50) {
+              clearInterval(interval);
+              reject(new Error("A-Frame is niet beschikbaar"));
+            }
+          }, 100);
+        });
+
+        // laad MindAR pas NA AFRAME
         await loadScript(
           "https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-face-aframe.prod.js",
         );
+
+        // kleine extra delay
+        await new Promise((resolve) => setTimeout(resolve, 300));
 
         setArReady(true);
       } catch (error) {
@@ -399,13 +418,11 @@ export default function TuneMatchAR() {
 
           <img src={photoUrl} alt="TuneMatch screenshot" />
 
-          <a href={photoUrl} target="_blank"> 
+          <a href={photoUrl} target="_blank">
             Open Photo
           </a>
 
-          <div className="qr-wrapper">
-          
-          </div>
+          <div className="qr-wrapper"></div>
         </div>
       )}
     </main>
