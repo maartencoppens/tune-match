@@ -1,8 +1,6 @@
-// src/audio/audioController.ts
-
 import path from "node:path";
 import player from "play-sound";
-import type { Screen } from "../state/installation-state.js";
+import type { Screen } from "../../installation/installation-state.js";
 
 const audio = player();
 
@@ -14,7 +12,6 @@ const audioGroupByScreen: Record<Screen, AudioGroup> = {
   idle: "idle",
   intro: "intro",
 
-  // zelfde muziek blijft spelen
   question: "quiz",
   answer_reveal: "quiz",
 
@@ -53,9 +50,6 @@ function getSoundPath(filename: string) {
 export function playSoundForScreen(screen: Screen) {
   const nextAudioGroup = audioGroupByScreen[screen];
 
-  // Belangrijk:
-  // question -> answer_reveal -> question blijft dezelfde audio group.
-  // Dus muziek wordt niet opnieuw gestart.
   if (nextAudioGroup === currentAudioGroup) {
     return;
   }

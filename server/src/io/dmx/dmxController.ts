@@ -1,6 +1,6 @@
 import { dmxScenes } from "./scenes.js";
-import type { Screen } from "../state/installation-state.js";
-import type { Zone } from "../shared/events.js";
+import type { Screen } from "../../installation/installation-state.js";
+import type { Zone } from "../../shared/events.js";
 
 function logController(message: string, data?: unknown) {
   console.log(`\n[DMX CONTROLLER] ${message}`);
@@ -42,8 +42,6 @@ export function applyZonePulse(zone: Zone) {
 
   logController(`Zone pulse: ${zone}`);
 
-  // Voorlopig één algemene pulse.
-  // Later kan je per zone aparte kleuren maken.
   return dmxScenes.zoneRedPulse();
 }
 
@@ -59,9 +57,6 @@ export function applyBlackout() {
   return dmxScenes.blackout();
 }
 
-/**
- * Deze functie roep je aan wanneer installationState.screen verandert.
- */
 export function syncDmxWithInstallationState(state: { screen: Screen }) {
   logController("Sync with installationState", state);
 
