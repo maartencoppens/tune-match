@@ -1,5 +1,4 @@
-import { installationState } from "./installation-state.js";
-import { publishInstallationState } from "./publish-state.js";
+import { transitionToIdle } from "./phase-manager.js";
 
 const IDLE_TIMEOUT_MS = 2 * 60 * 1000;
 
@@ -11,16 +10,7 @@ export function resetIdleTimer(): void {
   }
 
   idleTimer = setTimeout(() => {
-    goToIdleBecauseOfInactivity();
+    console.log("[IDLE TIMER] No zone updates received. Going to idle.");
+    transitionToIdle();
   }, IDLE_TIMEOUT_MS);
-}
-
-function goToIdleBecauseOfInactivity(): void {
-  console.log("[IDLE TIMER] No zone updates received. Going to idle.");
-
-  installationState.screen = "idle";
-  installationState.activeZone = "NONE";
-  installationState.dwellProgress = 0;
-
-  publishInstallationState();
 }

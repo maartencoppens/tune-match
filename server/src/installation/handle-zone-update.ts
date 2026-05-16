@@ -1,19 +1,40 @@
 import { installationState } from "./installation-state.js";
+import { transitionToIntro } from "./phase-manager.js";
 import { resetIdleTimer } from "./idle-timer.js";
 import { broadcastInstallationState } from "./publish-state.js";
 import { startDwell, stopDwell } from "./dwell.js";
 
 export function handleZoneUpdate(zone: string): void {
-  resetIdleTimer();
+  // Only track inactivity during idle and quiz; timed screens use phase-manager timers.
+  if (
+    installationState.screen === "idle" ||
+    installationState.screen === "question"
+  ) {
+    resetIdleTimer();
+  }
 
-  if (installationState.screen !== "question") {
-    console.log(
-      "ZONE_UPDATE ignored: not in question phase. Current screen:",
-      installationState.screen,
-    );
+  switch (installationState.screen) {
+    case "idle":
+      handleIdleZone(zone);
+      break;
+    case "question":
+      handleQuestionZone(zone);
+      break;
+    default:
+      break;
+  }
+}
+
+function handleIdleZone(zone: string): void {
+  if (zone !== "CENTER") {
     return;
   }
 
+  console.log("[ZONE] CENTER in idle → starting intro");
+  transitionToIntro();
+}
+
+function handleQuestionZone(zone: string): void {
   if (zone === installationState.activeZone) {
     return;
   }

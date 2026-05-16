@@ -8,6 +8,8 @@ function screenToPath(screen: string | undefined) {
   switch (screen) {
     case "idle":
       return "/";
+    case "intro":
+      return "/intro";
     case "question":
       return "/quiz";
     case "answer_reveal":
