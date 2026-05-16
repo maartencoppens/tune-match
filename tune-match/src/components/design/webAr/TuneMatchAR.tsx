@@ -1,9 +1,60 @@
 "use client";
 import genreVibes from "../../../../data/genreVibes.json";
 import { useEffect, useRef, useState } from "react";
+import { QRCodeSVG } from "qrcode.react";
+import { useQuizState } from "@/components/functional/QuizStateProvider";
 import CameraScene from "./CameraScene";
 
 type Genre = keyof typeof genreVibes;
+
+const normalizedQuizGenreToVibeGenre: Record<string, Genre> = {
+  pop: "pop",
+  hiphop: "hiphop",
+  hiphoprap: "hiphop",
+  rap: "hiphop",
+  edm: "techno",
+  electronic: "techno",
+  dance: "techno",
+  indie: "rock",
+  indierock: "rock",
+  rock: "rock",
+  punk: "metal",
+  punkrock: "metal",
+  metal: "metal",
+};
+
+function normalizeGenreName(value: string) {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[‐‑‒–—−]/g, "-")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "")
+    .trim();
+}
+
+function mapQuizGenreToVibeGenre(quizGenreName?: string | null): Genre | null {
+  if (!quizGenreName) {
+    return null;
+  }
+
+  const normalizedQuizGenre = normalizeGenreName(quizGenreName);
+
+  if (normalizedQuizGenreToVibeGenre[normalizedQuizGenre]) {
+    return normalizedQuizGenreToVibeGenre[normalizedQuizGenre];
+  }
+
+  const directMatch = (Object.keys(genreVibes) as Genre[]).find(
+    (vibeGenre) => normalizeGenreName(vibeGenre) === normalizedQuizGenre,
+  );
+
+  if (directMatch) {
+    return directMatch;
+  }
+
+  console.warn("Unknown quiz genre, falling back to pop:", quizGenreName);
+  return "pop";
+}
 
 type PhotoData = {
   vibeTitle: string;
@@ -55,7 +106,11 @@ async function ensureCameraPermission() {
   }
 
   const stream = await navigator.mediaDevices.getUserMedia({
-    video: { facingMode: "user", width: { ideal: 1280 }, height: { ideal: 720 } },
+    video: {
+      facingMode: "user",
+      width: { ideal: 1280 },
+      height: { ideal: 720 },
+    },
     audio: false,
   });
 
@@ -75,13 +130,16 @@ function stopMindarCamera() {
 }
 
 export default function TuneMatchAR() {
-  const [genre, setGenre] = useState("");
   const [scriptsReady, setScriptsReady] = useState(false);
   const [cameraLive, setCameraLive] = useState(false);
   const [cameraError, setCameraError] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const [countdown, setCountdown] = useState<number | null>(null);
   const [photoUrl, setPhotoUrl] = useState("");
+  const [photoDownloadUrl, setPhotoDownloadUrl] = useState("");
+  const { resultGenre } = useQuizState();
+
+  const selectedGenre = mapQuizGenreToVibeGenre(resultGenre?.name);
 
   const cardLabelRef = useRef<any>(null);
   const cardTitleRef = useRef<any>(null);
@@ -90,6 +148,7 @@ export default function TuneMatchAR() {
   const cardCoverRef = useRef<any>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const cameraBoxRef = useRef<HTMLDivElement | null>(null);
+  const didAutoStartRef = useRef(false);
 
   useEffect(() => {
     const originalWarn = console.warn;
@@ -194,6 +253,21 @@ export default function TuneMatchAR() {
     setupAR();
   }, []);
 
+  useEffect(() => {
+    if (
+      !scriptsReady ||
+      !cameraLive ||
+      !selectedGenre ||
+      didAutoStartRef.current ||
+      isSearching
+    ) {
+      return;
+    }
+
+    didAutoStartRef.current = true;
+    void searchRandomSongByGenre(selectedGenre);
+  }, [scriptsReady, cameraLive, isSearching, selectedGenre]);
+
   function set3DText(ref: React.RefObject<any>, value: string) {
     ref.current?.setAttribute("value", value);
   }
@@ -217,7 +291,9 @@ export default function TuneMatchAR() {
   async function takeScreenshot(dataForPhoto: PhotoData) {
     try {
       const video =
-        (cameraBoxRef.current?.querySelector("video") as HTMLVideoElement | null) ??
+        (cameraBoxRef.current?.querySelector(
+          "video",
+        ) as HTMLVideoElement | null) ??
         (document.querySelector("video") as HTMLVideoElement | null);
 
       if (!video) {
@@ -299,7 +375,7 @@ export default function TuneMatchAR() {
 
       const dataUrl = canvas.toDataURL("image/png");
 
-      const response = await fetch("/api/upload-photo", {
+      const response = await fetch("/api/uploadPhoto", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -314,6 +390,7 @@ export default function TuneMatchAR() {
       }
 
       setPhotoUrl(data.imageUrl);
+      setPhotoDownloadUrl(data.downloadUrl ?? data.imageUrl);
     } catch (error) {
       console.error("Screenshot/upload fout:", error);
       alert("Screenshot maken is mislukt. Check de console.");
@@ -346,21 +423,20 @@ export default function TuneMatchAR() {
     return finalArtist;
   }
 
-  async function searchRandomSongByGenre() {
-    const selectedGenre = genre.trim().toLowerCase() as Genre;
-
+  async function searchRandomSongByGenre(selectedGenre: Genre) {
     if (!selectedGenre) {
-      alert("Typ eerst een genre");
+      alert("Geen genre gevonden uit de quiz");
       return;
     }
 
     if (!genreVibes[selectedGenre]) {
-      alert("Genre niet gevonden. Probeer: pop, rock, hiphop, techno of metal");
+      alert("Quiz genre kon niet gekoppeld worden aan Deezer vibes");
       return;
     }
 
     setIsSearching(true);
     setPhotoUrl("");
+    setPhotoDownloadUrl("");
 
     if (audioRef.current) {
       audioRef.current.pause();
@@ -429,18 +505,16 @@ export default function TuneMatchAR() {
       <h1>TuneMatch 🎵</h1>
 
       <div className="controls">
-        <input
-          value={genre}
-          onChange={(event) => setGenre(event.target.value)}
-          placeholder="Typ genre bv. rock"
-        />
-
-        <button onClick={searchRandomSongByGenre} disabled={isSearching}>
-          {isSearching ? "Scanning..." : "Scan my vibe"}
-        </button>
+        <div>
+          <p>Quiz result: {resultGenre?.name ?? "waiting for result"}</p>
+          <p>Deezer vibe: {selectedGenre ?? "not matched yet"}</p>
+          <p>
+            {isSearching
+              ? "Searching Deezer automatically..."
+              : "Waiting for the quiz result to start the search."}
+          </p>
+        </div>
       </div>
-
-      <p>Testgenres: pop, rock, hiphop, techno, metal</p>
 
       <audio ref={audioRef} controls />
 
@@ -468,11 +542,17 @@ export default function TuneMatchAR() {
 
           <img src={photoUrl} alt="TuneMatch screenshot" />
 
-          <a href={photoUrl} target="_blank">
+          <a
+            href={photoDownloadUrl || photoUrl}
+            target="_blank"
+            rel="noreferrer"
+          >
             Open Photo
           </a>
 
-          <div className="qr-wrapper"></div>
+          <div className="qr-wrapper">
+            <QRCodeSVG value={photoDownloadUrl || photoUrl} size={160} />
+          </div>
         </div>
       )}
     </main>

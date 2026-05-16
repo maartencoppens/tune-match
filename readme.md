@@ -174,6 +174,14 @@ Then type:
 ```bash
 cd /Users/maarten/Files/DEV4/dev-4-tunematch/tracking
 python3 -m venv .venv
+
+MAC:
 source .venv/bin/activate
+
+WINDOWS:
+
+.venv\Scripts\activate
+
+
 pip install -r requirements.txt
 ```

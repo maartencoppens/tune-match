@@ -21,17 +21,35 @@ function isValidPayload(payload: unknown): payload is SubmitAnswersPayload {
 
 function calculateTopGenre(scores: GenreScore[]) {
   const totals = new Map<string, number>();
+  const strongHits = new Map<string, number>();
+  const hitCounts = new Map<string, number>();
 
   for (const scoreEntry of scores) {
-    totals.set(
-      scoreEntry.genreId,
-      (totals.get(scoreEntry.genreId) ?? 0) + scoreEntry.score,
-    );
+    const genreId = scoreEntry.genreId;
+
+    totals.set(genreId, (totals.get(genreId) ?? 0) + scoreEntry.score);
+
+    hitCounts.set(genreId, (hitCounts.get(genreId) ?? 0) + 1);
+
+    if (scoreEntry.score >= 2) {
+      strongHits.set(genreId, (strongHits.get(genreId) ?? 0) + 1);
+    }
   }
 
   const ranked = [...totals.entries()].sort(
-    ([genreA, scoreA], [genreB, scoreB]) =>
-      scoreB - scoreA || genreA.localeCompare(genreB),
+    ([genreA, scoreA], [genreB, scoreB]) => {
+      const strongHitDiff =
+        (strongHits.get(genreB) ?? 0) - (strongHits.get(genreA) ?? 0);
+      const hitCountDiff =
+        (hitCounts.get(genreB) ?? 0) - (hitCounts.get(genreA) ?? 0);
+
+      return (
+        scoreB - scoreA ||
+        strongHitDiff ||
+        hitCountDiff ||
+        genreA.localeCompare(genreB)
+      );
+    },
   );
 
   return ranked[0]?.[0] ?? null;

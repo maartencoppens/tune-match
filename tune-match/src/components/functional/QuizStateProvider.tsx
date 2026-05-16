@@ -5,9 +5,11 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
+import { usePathname } from "next/navigation";
 import { useInstallationState } from "@/core/hooks/useInstallationState";
 import type {
   AnswersResponse,
@@ -18,6 +20,8 @@ import type {
   QuestionsResponse,
 } from "@/core/modules/questions/types";
 import { ZONES, type Zone } from "@/core/modules/zones/types";
+
+const RESULT_GENRE_STORAGE_KEY = "tunematch_result_genre";
 
 type QuizStateContextValue = {
   questions: Question[];
@@ -58,6 +62,8 @@ export default function QuizStateProvider({
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const pathname = usePathname();
+  const previousScreenRef = useRef<string | undefined>(undefined);
 
   const {
     installationState,
@@ -69,6 +75,91 @@ export default function QuizStateProvider({
 
   const currentIndex = installationState?.currentQuestion ?? 0;
   const currentQuestion = questions[currentIndex];
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const storedResultGenre = window.sessionStorage.getItem(
+      RESULT_GENRE_STORAGE_KEY,
+    );
+
+    if (pathname === "/photo") {
+      if (!storedResultGenre || resultGenre) {
+        return;
+      }
+
+      try {
+        const parsed = JSON.parse(storedResultGenre) as ResultGenre;
+
+        if (parsed?.id && parsed?.name) {
+          setResultGenre(parsed);
+        }
+      } catch {
+        window.sessionStorage.removeItem(RESULT_GENRE_STORAGE_KEY);
+      }
+
+      return;
+    }
+
+    if (!resultGenre) {
+      window.sessionStorage.removeItem(RESULT_GENRE_STORAGE_KEY);
+    }
+  }, [pathname, resultGenre]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    if (!resultGenre) {
+      window.sessionStorage.removeItem(RESULT_GENRE_STORAGE_KEY);
+      return;
+    }
+
+    window.sessionStorage.setItem(
+      RESULT_GENRE_STORAGE_KEY,
+      JSON.stringify(resultGenre),
+    );
+  }, [resultGenre]);
+
+  useEffect(() => {
+    if (!installationState || typeof window === "undefined") {
+      return;
+    }
+
+    const previousScreen = previousScreenRef.current;
+    const currentScreen = installationState.screen;
+    const enteringIntroFromLaterPhase =
+      currentScreen === "intro" &&
+      (previousScreen === "result" ||
+        previousScreen === "photo" ||
+        previousScreen === "question" ||
+        previousScreen === "answer_reveal");
+    const enteringFirstQuestion =
+      currentScreen === "question" && installationState.currentQuestion === 0;
+
+    const hasStaleResultState =
+      !!resultGenre ||
+      !!errorMessage ||
+      Object.keys(selectedByQuestion).length > 0 ||
+      !!window.sessionStorage.getItem(RESULT_GENRE_STORAGE_KEY);
+
+    if (
+      !(enteringIntroFromLaterPhase || enteringFirstQuestion) ||
+      !hasStaleResultState
+    ) {
+      previousScreenRef.current = currentScreen;
+      return;
+    }
+
+    setResultGenre(null);
+    setSelectedByQuestion({});
+    setErrorMessage(null);
+    window.sessionStorage.removeItem(RESULT_GENRE_STORAGE_KEY);
+    previousScreenRef.current = currentScreen;
+  }, [installationState, resultGenre, errorMessage, selectedByQuestion]);
 
   useEffect(() => {
     const loadQuestions = async () => {
@@ -153,12 +244,11 @@ export default function QuizStateProvider({
   useEffect(() => {
     const allAnswersSelected =
       Object.keys(selectedByQuestion).length === questions.length;
-    const isInRevealPhase = installationState?.screen === "answer_reveal";
     const shouldSubmit =
       allAnswersSelected &&
-      !isInRevealPhase &&
       questions.length > 0 &&
-      !resultGenre;
+      !resultGenre &&
+      !isSubmitting;
 
     if (shouldSubmit) {
       void submitAllAnswers(selectedByQuestion);
@@ -166,8 +256,8 @@ export default function QuizStateProvider({
   }, [
     selectedByQuestion,
     questions.length,
-    installationState?.screen,
     resultGenre,
+    isSubmitting,
     submitAllAnswers,
   ]);
 
@@ -219,6 +309,10 @@ export default function QuizStateProvider({
     setSelectedByQuestion({});
     setResultGenre(null);
     setErrorMessage(null);
+
+    if (typeof window !== "undefined") {
+      window.sessionStorage.removeItem(RESULT_GENRE_STORAGE_KEY);
+    }
   };
 
   const progressPercent =
