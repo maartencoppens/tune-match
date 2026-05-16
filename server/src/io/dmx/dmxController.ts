@@ -1,5 +1,9 @@
 import { dmxScenes } from "./scenes.js";
-import type { Screen } from "../../installation/installation-state.js";
+import type { DmxFrame } from "./scenes.js";
+import {
+  installationState,
+  type Screen,
+} from "../../installation/installation-state.js";
 import type { Zone } from "../../shared/events.js";
 
 function logController(message: string, data?: unknown) {
@@ -13,6 +17,8 @@ function logController(message: string, data?: unknown) {
 export function applyLightingForScreen(screen: Screen) {
   logController(`Apply lighting for screen: ${screen}`);
 
+  const questionFrame = question(screen);
+
   switch (screen) {
     case "idle":
       return dmxScenes.idleAmbient();
@@ -21,7 +27,7 @@ export function applyLightingForScreen(screen: Screen) {
       return dmxScenes.introGlow();
 
     case "question":
-      return dmxScenes.questionBlue();
+      return questionFrame;
 
     case "answer_reveal":
       return dmxScenes.selectionConfirmed();
@@ -61,4 +67,42 @@ export function syncDmxWithInstallationState(state: { screen: Screen }) {
   logController("Sync with installationState", state);
 
   return applyLightingForScreen(state.screen);
+}
+
+let lastScreen: Screen | null = null;
+let questionTimer: ReturnType<typeof setTimeout> | null = null;
+let questionLightingId = 0;
+
+function stopQuestionLighting(): void {
+  questionLightingId += 1;
+  if (questionTimer) clearTimeout(questionTimer);
+  questionTimer = null;
+}
+
+function question(screen: Screen): DmxFrame | undefined {
+  const enter = screen === "question" && lastScreen !== "question";
+  lastScreen = screen;
+
+  if (screen !== "question") {
+    stopQuestionLighting();
+    return;
+  }
+
+  if (!enter) return;
+
+  stopQuestionLighting();
+  const lightingId = questionLightingId;
+
+  questionTimer = setTimeout(() => {
+    questionTimer = null;
+    if (
+      lightingId !== questionLightingId ||
+      installationState.screen !== "question"
+    ) {
+      return;
+    }
+    dmxScenes.questionMain();
+  }, 5_000);
+
+  return dmxScenes.questionIntro();
 }
