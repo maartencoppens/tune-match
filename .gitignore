@@ -20,6 +20,7 @@ out/
 
 # typescript
 *.tsbuildinfo
+server/dist/
 
 # os
 .DS_Store

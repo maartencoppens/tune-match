@@ -8,8 +8,7 @@ export type Screen =
   | "question"
   | "answer_reveal"
   | "result"
-  | "photo"
-  | "reset";
+  | "photo";
 
 export const installationState = {
   screen: "idle" as Screen,
@@ -24,5 +23,15 @@ export const installationState = {
 
   selections: [] as Zone[],
 
+  /** Time on answer_reveal before next question or result */
   revealDelayMs: 1500,
+
+  /** Explanation / intro screen */
+  introDurationMs: 30_000,
+
+  /** Result screen before photo */
+  resultDurationMs: 10_000,
+
+  /** Photo screen before returning to idle */
+  photoDurationMs: 15_000,
 };
