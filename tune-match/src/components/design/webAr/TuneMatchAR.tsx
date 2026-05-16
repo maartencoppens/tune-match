@@ -450,7 +450,7 @@ export default function TuneMatchAR() {
       set3DText(cardSubtitleRef, randomArtist);
 
       const response = await fetch(
-        `/api/search?genre=${encodeURIComponent(selectedGenre)}`,
+        `/api/search?artist=${encodeURIComponent(randomArtist)}`,
       );
 
       const data = await response.json();

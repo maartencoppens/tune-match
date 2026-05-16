@@ -5,9 +5,11 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
+import { usePathname } from "next/navigation";
 import { useInstallationState } from "@/core/hooks/useInstallationState";
 import type {
   AnswersResponse,
@@ -60,6 +62,8 @@ export default function QuizStateProvider({
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const pathname = usePathname();
+  const previousScreenRef = useRef<string | undefined>(undefined);
 
   const {
     installationState,
@@ -81,20 +85,28 @@ export default function QuizStateProvider({
       RESULT_GENRE_STORAGE_KEY,
     );
 
-    if (!storedResultGenre) {
+    if (pathname === "/photo") {
+      if (!storedResultGenre || resultGenre) {
+        return;
+      }
+
+      try {
+        const parsed = JSON.parse(storedResultGenre) as ResultGenre;
+
+        if (parsed?.id && parsed?.name) {
+          setResultGenre(parsed);
+        }
+      } catch {
+        window.sessionStorage.removeItem(RESULT_GENRE_STORAGE_KEY);
+      }
+
       return;
     }
 
-    try {
-      const parsed = JSON.parse(storedResultGenre) as ResultGenre;
-
-      if (parsed?.id && parsed?.name) {
-        setResultGenre(parsed);
-      }
-    } catch {
+    if (!resultGenre) {
       window.sessionStorage.removeItem(RESULT_GENRE_STORAGE_KEY);
     }
-  }, []);
+  }, [pathname, resultGenre]);
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -111,6 +123,43 @@ export default function QuizStateProvider({
       JSON.stringify(resultGenre),
     );
   }, [resultGenre]);
+
+  useEffect(() => {
+    if (!installationState || typeof window === "undefined") {
+      return;
+    }
+
+    const previousScreen = previousScreenRef.current;
+    const currentScreen = installationState.screen;
+    const enteringIntroFromLaterPhase =
+      currentScreen === "intro" &&
+      (previousScreen === "result" ||
+        previousScreen === "photo" ||
+        previousScreen === "question" ||
+        previousScreen === "answer_reveal");
+    const enteringFirstQuestion =
+      currentScreen === "question" && installationState.currentQuestion === 0;
+
+    const hasStaleResultState =
+      !!resultGenre ||
+      !!errorMessage ||
+      Object.keys(selectedByQuestion).length > 0 ||
+      !!window.sessionStorage.getItem(RESULT_GENRE_STORAGE_KEY);
+
+    if (
+      !(enteringIntroFromLaterPhase || enteringFirstQuestion) ||
+      !hasStaleResultState
+    ) {
+      previousScreenRef.current = currentScreen;
+      return;
+    }
+
+    setResultGenre(null);
+    setSelectedByQuestion({});
+    setErrorMessage(null);
+    window.sessionStorage.removeItem(RESULT_GENRE_STORAGE_KEY);
+    previousScreenRef.current = currentScreen;
+  }, [installationState, resultGenre, errorMessage, selectedByQuestion]);
 
   useEffect(() => {
     const loadQuestions = async () => {
@@ -195,12 +244,11 @@ export default function QuizStateProvider({
   useEffect(() => {
     const allAnswersSelected =
       Object.keys(selectedByQuestion).length === questions.length;
-    const isInRevealPhase = installationState?.screen === "answer_reveal";
     const shouldSubmit =
       allAnswersSelected &&
-      !isInRevealPhase &&
       questions.length > 0 &&
-      !resultGenre;
+      !resultGenre &&
+      !isSubmitting;
 
     if (shouldSubmit) {
       void submitAllAnswers(selectedByQuestion);
@@ -208,8 +256,8 @@ export default function QuizStateProvider({
   }, [
     selectedByQuestion,
     questions.length,
-    installationState?.screen,
     resultGenre,
+    isSubmitting,
     submitAllAnswers,
   ]);
 
