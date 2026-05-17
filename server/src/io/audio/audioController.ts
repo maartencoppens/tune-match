@@ -30,6 +30,9 @@ const soundByAudioGroup: Record<AudioGroup, string | null> = {
 let currentProcess: ReturnType<typeof audio.play> | null = null;
 let currentAudioGroup: AudioGroup | null = null;
 
+// single main volume value (0..1) — edit this file to change global playback loudness
+const volume = 0.1;
+
 function logAudio(message: string) {
   if (DEBUG_AUDIO) console.log(`[AUDIO] ${message}`);
 }
@@ -69,11 +72,37 @@ export function playSoundForScreen(screen: Screen) {
 
   logAudio(`Playing ${soundFile} for audio group: ${nextAudioGroup}`);
 
-  currentProcess = audio.play(soundPath, (err) => {
-    if (err) {
-      console.error("[AUDIO ERROR]", err);
+  // try common player args for volume (players that don't support these will ignore them)
+  const opts: Record<string, string[]> = {
+    afplay: ["-v", String(volume)],
+    mplayer: ["-volume", String(Math.round(volume * 100))],
+    mpg123: ["-f", String(Math.round(volume * 32768))],
+    vlc: ["--gain", String(volume)],
+    play: ["--volume", String(volume)],
+  };
+
+  const start = () => {
+    const proc = audio.play(soundPath, opts, (err) => {
+      if (err) {
+        console.error("[AUDIO ERROR]", err);
+      }
+    });
+
+    currentProcess = proc;
+
+    // when process exits, if the desired audio group is unchanged, restart (simple loop)
+    try {
+      if (proc && typeof proc.on === "function") {
+        proc.on("exit", () => {
+          if (currentAudioGroup === nextAudioGroup) start();
+        });
+      }
+    } catch (e) {
+      // ignore handler errors
     }
-  });
+  };
+
+  start();
 }
 
 export function playSelectionSound() {
@@ -81,7 +110,15 @@ export function playSelectionSound() {
 
   logAudio("Playing selection confirm sound");
 
-  audio.play(soundPath, (err) => {
+  const opts: Record<string, string[]> = {
+    afplay: ["-v", String(volume)],
+    mplayer: ["-volume", String(Math.round(volume * 100))],
+    mpg123: ["-f", String(Math.round(volume * 32768))],
+    vlc: ["--gain", String(volume)],
+    play: ["--volume", String(volume)],
+  };
+
+  const process = audio.play(soundPath, opts, (err) => {
     if (err) {
       console.error("[AUDIO ERROR]", err);
     }

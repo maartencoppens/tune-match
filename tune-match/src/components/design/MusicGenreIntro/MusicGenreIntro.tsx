@@ -3,6 +3,7 @@
 import { useRef, useEffect } from "react";
 import gsap from "gsap";
 import styles from "./MusicGenreIntro.module.css";
+import { useAudio } from "@/core/audio/AudioProvider";
 
 // ─────────────────────────────────────────────
 // TEKSTEN — pas hier makkelijk alle teksten aan
@@ -49,6 +50,7 @@ const TIMING = {
 };
 
 export default function MusicGenreIntro() {
+  const { playVoice } = useAudio();
   // ── Refs ──────────────────────────────────
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -109,7 +111,10 @@ export default function MusicGenreIntro() {
       // ─────────────────────────────────────
       // SCENE 1 — Stap in de cirkel
       // ─────────────────────────────────────
-      tl.call(() => setInstruction(COPY.scene1.instruction))
+      tl.call(() => {
+        setInstruction(COPY.scene1.instruction);
+        playVoice("/audio/explanation/scene1.mp3");
+      })
         // Cirkel pulseert
         .to(
           circleGlowRef.current,
@@ -141,7 +146,10 @@ export default function MusicGenreIntro() {
         // ─────────────────────────────────────
         // SCENE 2 — Vragen
         // ─────────────────────────────────────
-        .call(() => setInstruction(COPY.scene2.instruction))
+        .call(() => {
+          setInstruction(COPY.scene2.instruction);
+          playVoice("/audio/explanation/scene2.mp3");
+        })
         .to(questionRef.current, {
           autoAlpha: 1,
           y: 0,
@@ -180,8 +188,10 @@ export default function MusicGenreIntro() {
         // ─────────────────────────────────────
         // SCENE 3 — Stap op het kleurvak
         // ─────────────────────────────────────
-        .call(() => setInstruction(COPY.scene3.instruction))
-        // Alle 4 panelen zichtbaar met labels
+        .call(() => {
+          setInstruction(COPY.scene3.instruction);
+          playVoice("/audio/explanation/scene3.mp3");
+        }) // Alle 4 panelen zichtbaar met labels
         .to(panelRefs.current, { opacity: 0.7, duration: 0.5, stagger: 0.1 })
         // Avatar beweegt naar paneel B (rechtsonder)
         .to(
@@ -207,7 +217,10 @@ export default function MusicGenreIntro() {
         // ─────────────────────────────────────
         // SCENE 4 — Resultaat
         // ─────────────────────────────────────
-        .call(() => setInstruction(COPY.scene4.instruction))
+        .call(() => {
+          setInstruction(COPY.scene4.instruction);
+          playVoice("/audio/explanation/scene4.mp3");
+        })
         // Neon glow achtergrond flitst kort op
         .to(
           glowOverlayRef.current,
@@ -245,7 +258,10 @@ export default function MusicGenreIntro() {
         // ─────────────────────────────────────
         // SCENE 5 — QR-code
         // ─────────────────────────────────────
-        .call(() => setInstruction(COPY.scene5.instruction))
+        .call(() => {
+          setInstruction(COPY.scene5.instruction);
+          playVoice("/audio/explanation/scene5.mp3");
+        })
         .to(
           qrRef.current,
           { autoAlpha: 1, scale: 1, duration: 0.6, ease: "back.out(1.3)" },

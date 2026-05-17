@@ -4,6 +4,7 @@ import "./reset.css";
 import "./globals.css";
 import QuizStateProvider from "../components/functional/QuizStateProvider";
 import StateDrivenRouter from "../components/functional/StateDrivenRouter";
+import AudioProvider from "@/core/audio/AudioProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,7 +34,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         <QuizStateProvider>
           <StateDrivenRouter />
-          {children}
+          <AudioProvider>{children}</AudioProvider>
         </QuizStateProvider>
       </body>
     </html>
