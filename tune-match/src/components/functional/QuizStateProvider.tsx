@@ -198,6 +198,11 @@ export default function QuizStateProvider({
         const answerOptionIds = questions.map(
           (question) => nextSelections[question.id],
         );
+        console.log("[DEBUG] submitting:", {
+          answerOptionIds,
+          nextSelections,
+          questions,
+        });
 
         const response = await fetch("/api/answers", {
           method: "POST",

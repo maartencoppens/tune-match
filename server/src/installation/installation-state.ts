@@ -33,5 +33,5 @@ export const installationState = {
   resultDurationMs: 10_000,
 
   /** Photo screen before returning to idle */
-  photoDurationMs: 45_000,
+  photoDurationMs: 30_000,
 };

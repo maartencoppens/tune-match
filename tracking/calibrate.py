@@ -1,7 +1,18 @@
 import cv2
 import json
+import os
 
-CAMERA_INDEX = 0
+def get_camera_index():
+    value = os.getenv("TRACKER_CAMERA_INDEX", "0")
+
+    try:
+        return int(value)
+    except ValueError:
+        print(f"Invalid TRACKER_CAMERA_INDEX={value!r}, falling back to 0")
+        return 0
+
+
+CAMERA_INDEX = get_camera_index()
 WINDOW_NAME = "Polygon Calibration"
 OUTPUT_FILE = "zones.json"
 

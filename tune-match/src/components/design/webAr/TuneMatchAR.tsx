@@ -73,6 +73,28 @@ function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+function getWebArCameraSettings() {
+  const deviceId = process.env.NEXT_PUBLIC_WEBAR_CAMERA_DEVICE_ID;
+  const facingMode =
+    (process.env.NEXT_PUBLIC_WEBAR_CAMERA_FACING_MODE as
+      | "user"
+      | "environment"
+      | undefined) || "user";
+
+  return { deviceId, facingMode };
+}
+
+function buildCameraConstraints(
+  settings: ReturnType<typeof getWebArCameraSettings>,
+  preferDeviceId: boolean,
+): MediaTrackConstraints {
+  if (preferDeviceId && settings.deviceId) {
+    return { deviceId: { exact: settings.deviceId } };
+  }
+
+  return { facingMode: settings.facingMode };
+}
+
 function loadScript(src: string) {
   return new Promise<void>((resolve, reject) => {
     if (document.querySelector(`script[src="${src}"]`)) {
@@ -105,14 +127,36 @@ async function ensureCameraPermission() {
     throw new Error("Camera wordt niet ondersteund in deze browser.");
   }
 
-  const stream = await navigator.mediaDevices.getUserMedia({
-    video: {
-      facingMode: "user",
-      width: { ideal: 1280 },
-      height: { ideal: 720 },
-    },
-    audio: false,
-  });
+  const cameraSettings = getWebArCameraSettings();
+  const preferredVideoConstraints = {
+    ...buildCameraConstraints(cameraSettings, true),
+    width: { ideal: 1280 },
+    height: { ideal: 720 },
+  };
+
+  const fallbackVideoConstraints = {
+    ...buildCameraConstraints(cameraSettings, false),
+    width: { ideal: 1280 },
+    height: { ideal: 720 },
+  };
+
+  let stream: MediaStream;
+
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({
+      video: preferredVideoConstraints,
+      audio: false,
+    });
+  } catch (error) {
+    if (!cameraSettings.deviceId) {
+      throw error;
+    }
+
+    stream = await navigator.mediaDevices.getUserMedia({
+      video: fallbackVideoConstraints,
+      audio: false,
+    });
+  }
 
   stream.getTracks().forEach((track) => track.stop());
 }
@@ -252,7 +296,7 @@ export default function TuneMatchAR() {
 
         setCameraError(
           error instanceof Error
-            ? error.message
+            ? `${error.message} Stel NEXT_PUBLIC_WEBAR_CAMERA_FACING_MODE of NEXT_PUBLIC_WEBAR_CAMERA_DEVICE_ID in als de verkeerde camera wordt gekozen.`
             : "WebAR kon niet starten. Sta camera-toegang toe.",
         );
       }

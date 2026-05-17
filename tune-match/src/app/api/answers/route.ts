@@ -121,7 +121,14 @@ export async function POST(request: Request) {
 
     const flatScores = selectedOptions.flatMap((option) => option.genreScores);
     const winningGenreId = calculateTopGenre(flatScores);
-
+    console.log("[DEBUG] flatScores:", JSON.stringify(flatScores, null, 2));
+    console.log(
+      "[DEBUG] selectedOptions genreScores counts:",
+      selectedOptions.map((o) => ({
+        id: o.id,
+        scoreCount: o.genreScores.length,
+      })),
+    );
     if (!winningGenreId) {
       return NextResponse.json(
         { error: "No genre scoring found for selected answers." },

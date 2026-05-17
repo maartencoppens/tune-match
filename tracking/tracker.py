@@ -3,13 +3,24 @@ import cv2
 import json
 import numpy as np
 import platform
+import os
 import time
 import threading
 from websocket import create_connection
 
 model = YOLO("yolov8n.pt")
 
-CAMERA_INDEX = 0
+def get_camera_index():
+    value = os.getenv("TRACKER_CAMERA_INDEX", "0")
+
+    try:
+        return int(value)
+    except ValueError:
+        print(f"Invalid TRACKER_CAMERA_INDEX={value!r}, falling back to 0")
+        return 0
+
+
+CAMERA_INDEX = get_camera_index()
 
 
 def open_camera():
