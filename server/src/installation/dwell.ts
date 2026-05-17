@@ -2,6 +2,7 @@ import { EVENTS } from "../shared/events.js";
 import { broadcast } from "../io/websocket/broadcast.js";
 import { installationState } from "./installation-state.js";
 import { transitionToAnswerReveal } from "./phase-manager.js";
+import { sendLedUpdate } from "../io/led/serialConnection.js";
 
 let dwellInterval: NodeJS.Timeout | null = null;
 
@@ -28,12 +29,38 @@ export function startDwell(zone: string): void {
     if (progress >= 100) {
       stopDwell();
 
-      installationState.selections.push(zone as (typeof installationState.selections)[number]);
+      installationState.selections.push(
+        zone as (typeof installationState.selections)[number],
+      );
 
       broadcast({
         type: EVENTS.SELECTION_CONFIRMED,
         zone,
       });
+
+      try {
+        function zoneToLedPosition(z: string) {
+          switch (z) {
+            case "RED":
+              return "left" as const;
+            case "BLUE":
+              return "top" as const;
+            case "GREEN":
+              return "right" as const;
+            case "YELLOW":
+              return "bottom" as const;
+            case "CENTER":
+              return "center" as const;
+            default:
+              return null;
+          }
+        }
+
+        const pos = zoneToLedPosition(zone);
+        if (pos) sendLedUpdate(pos);
+      } catch (err) {
+        console.warn("[LED] Failed to notify selection confirmed", err);
+      }
 
       console.log("SELECTION CONFIRMED:", zone);
 
