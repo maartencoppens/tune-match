@@ -439,12 +439,6 @@ export default function MusicGenreIntro() {
         <div className={styles.phoneBtn} />
       </div>
 
-      {/* ── Branding onderaan ── */}
-      <div className={styles.brand} aria-hidden="true">
-        <span>MUSIC GENRE FINDER</span>
-        <span className={styles.brandDot}>◆</span>
-        <span>INSTALLATIE</span>
-      </div>
     </div>
   );
 }
