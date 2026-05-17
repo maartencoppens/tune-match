@@ -124,7 +124,9 @@ function NeonWireOrb({ audioData }: { audioData: AudioData }) {
     if (dotsRef.current) {
       dotsRef.current.rotation.y = time * 0.055;
       dotsRef.current.rotation.x = Math.sin(time * 0.25) * 0.12;
-      dotsRef.current.scale.setScalar(1 + boostedBass * 0.1 + boostedHigh * 0.08);
+      dotsRef.current.scale.setScalar(
+        1 + boostedBass * 0.1 + boostedHigh * 0.08,
+      );
     }
   });
 
@@ -155,7 +157,10 @@ function NeonWireOrb({ audioData }: { audioData: AudioData }) {
 
       <points ref={dotsRef}>
         <bufferGeometry>
-          <bufferAttribute attach="attributes-position" args={[dotPositions, 3]} />
+          <bufferAttribute
+            attach="attributes-position"
+            args={[dotPositions, 3]}
+          />
         </bufferGeometry>
 
         <pointsMaterial
@@ -225,7 +230,29 @@ export default function ReactiveOrb() {
 
   useEffect(() => {
     async function setupAudio() {
-      if (!audioRef.current) return;
+      // Probeer eerst een bestaande <audio> op de pagina te gebruiken (bv. TuneMatchAR).
+      if (!audioRef.current) {
+        const found = document.querySelector(
+          "audio",
+        ) as HTMLAudioElement | null;
+        if (found) {
+          audioRef.current = found;
+          // als het audio-element al geluid speelt, log dat we het gebruiken
+          // eslint-disable-next-line no-console
+          console.log(
+            "ReactiveOrb: using existing <audio> element for analysis",
+          );
+        }
+      }
+
+      if (!audioRef.current) {
+        // Geen audio-element gevonden; nothing to analyze.
+        // eslint-disable-next-line no-console
+        console.warn(
+          "ReactiveOrb: geen <audio> element gevonden — orb reageert alleen op aanwezige audio.",
+        );
+        return;
+      }
 
       if (!audioContextRef.current) {
         audioContextRef.current = new AudioContext();
@@ -234,32 +261,52 @@ export default function ReactiveOrb() {
       const audioContext = audioContextRef.current;
 
       if (!sourceCreatedRef.current) {
-        const analyser = audioContext.createAnalyser();
-        const source = audioContext.createMediaElementSource(audioRef.current);
+        try {
+          // createMediaElementSource vereist dat het audio element een HTMLAudioElement is
+          const analyser = audioContext.createAnalyser();
+          const source = audioContext.createMediaElementSource(
+            audioRef.current,
+          );
 
-        analyser.fftSize = 1024;
-        analyser.smoothingTimeConstant = 0.74;
+          analyser.fftSize = 1024;
+          analyser.smoothingTimeConstant = 0.74;
 
-        source.connect(analyser);
+          source.connect(analyser);
 
-        // Als je audio hoorbaar wil via dit element, uncomment deze lijn:
-        // analyser.connect(audioContext.destination);
+          // Als je audio hoorbaar wil via deze context, kun je de volgende regel activeren:
+          // analyser.connect(audioContext.destination);
 
-        const dataArray = new Uint8Array(analyser.frequencyBinCount);
+          const dataArray = new Uint8Array(analyser.frequencyBinCount);
 
-        setAudioData({
-          analyser,
-          dataArray,
-        });
+          setAudioData({ analyser, dataArray });
 
-        sourceCreatedRef.current = true;
+          sourceCreatedRef.current = true;
+          // eslint-disable-next-line no-console
+          console.log("ReactiveOrb: WebAudio analyser aangemaakt");
+        } catch (err) {
+          // eslint-disable-next-line no-console
+          console.error(
+            "ReactiveOrb: kon MediaElementSource niet aanmaken:",
+            err,
+          );
+          return;
+        }
       }
 
       try {
+        // Resume audio context in geval van gebruikers-interactie vereiste
+        if (audioContext.state === "suspended") {
+          await audioContext.resume();
+        }
+
+        // probeer audio te spelen als het element nog niet speelt (vaak al aanwezig in app)
         audioRef.current.muted = true;
-        await audioRef.current.play();
-      } catch {
-        // Browser kan autoplay blokkeren. Dan blijft de orb gewoon subtiel bewegen.
+        await audioRef.current.play().catch(() => {
+          // autoplay kan geblokkeerd worden; dat is ok
+        });
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.warn("ReactiveOrb: probleem bij starten audio playback:", err);
       }
     }
 
@@ -280,8 +327,6 @@ export default function ReactiveOrb() {
       </Canvas>
 
       <div className="orb-vignette" />
-
-      
     </div>
   );
 }
