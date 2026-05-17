@@ -99,7 +99,7 @@ export default function CameraScene({
 
       {showLoading && (
         <div className="absolute inset-0 z-40 grid place-items-center text-sm text-white/70">
-          {scriptsReady ? "Camera starten..." : "WebAR wordt geladen..."}
+          {scriptsReady ? "Camera starten..." : "Je foto wordt voorbereid..."}
         </div>
       )}
 
