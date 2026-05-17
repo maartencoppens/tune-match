@@ -218,7 +218,9 @@ function SoftStars() {
   );
 }
 
-export default function ReactiveOrb() {
+export default function ReactiveOrb(
+  { scale = 1 }: { scale?: number } = { scale: 1 },
+) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
   const sourceCreatedRef = useRef(false);
@@ -314,7 +316,7 @@ export default function ReactiveOrb() {
   }, []);
 
   return (
-    <div className="orb-container">
+    <div className="orb-container" style={{ transform: `scale(${scale})` }}>
       <div className="orb-background-glow" />
 
       <Canvas camera={{ position: [0, 0, 3.8], fov: 55 }}>

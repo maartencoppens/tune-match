@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import "./reset.css";
 import "./globals.css";
 import QuizStateProvider from "../components/functional/QuizStateProvider";
 import StateDrivenRouter from "../components/functional/StateDrivenRouter";

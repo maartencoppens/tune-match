@@ -11,14 +11,11 @@
   );
   --purple-transparent: rgb(88 28 135 / 0.5);
   --light-purple: #c40db1;
-}
-
-@theme inline {
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-
-  --color-light-purple: var(--light-purple);
-  --color-purple-transparent: var(--purple-transparent);
+  --header-surface: rgb(10 11 24 / 0.68);
+  --header-border: rgb(255 255 255 / 0.14);
+  --header-text: rgb(248 250 252 / 0.96);
+  --header-text-soft: rgb(226 232 240 / 0.76);
+  --header-accent: var(--light-purple);
 }
 
 html,
@@ -40,8 +37,10 @@ body {
 
 .orb-container {
   position: relative;
-  width: 100%;
-  height: 100vh;
+  width: min(100%, 860px);
+  height: clamp(320px, 56vw, 620px);
+  margin: 0 auto;
+  flex-shrink: 0;
   overflow: hidden;
 }
 
@@ -51,7 +50,6 @@ body {
   pointer-events: none;
 }
 
-/* MindAR injects <video> on body; keep feed visible inside the preview box */
 .mindar-camera-box {
   position: relative;
 }
@@ -73,5 +71,3 @@ body:has(.mindar-camera-box) > video {
   height: 100% !important;
   z-index: 1 !important;
 }
-
-

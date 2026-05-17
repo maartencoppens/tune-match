@@ -92,7 +92,13 @@ export default function QuizPage() {
           height={128}
         />
 
-        <div className="flex items-center justify-center rounded-3xl bg-light-purple/20 px-15 py-12.5">
+        <div
+          className="flex items-center justify-center rounded-3xl px-15 py-12.5"
+          style={{
+            backgroundColor:
+              "color-mix(in srgb, var(--light-purple) 20%, transparent)",
+          }}
+        >
           <h1 className="mt-3 text-center text-4xl font-semibold text-white">
             {currentQuestion.text}
           </h1>
