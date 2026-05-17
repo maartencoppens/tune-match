@@ -1,9 +1,17 @@
+"use client";
+
 import React, { createContext, useContext, useEffect, useRef } from "react";
 import { useInstallationState } from "../hooks/useInstallationState";
 
-type AudioContextType = { analyser: AnalyserNode | null };
+type AudioContextType = {
+  analyser: AnalyserNode | null;
+  playVoice: (src: string) => void;
+};
 
-const AudioCtx = createContext<AudioContextType>({ analyser: null });
+const AudioCtx = createContext<AudioContextType>({
+  analyser: null,
+  playVoice: () => {},
+});
 
 export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -12,11 +20,31 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
+  const voiceRef = useRef<HTMLAudioElement | null>(null);
+
+  function playVoice(src: string) {
+    const voice = voiceRef.current;
+    if (!voice) return;
+
+    voice.pause();
+    voice.currentTime = 0;
+    voice.src = src;
+    voice.play().catch(() => {});
+  }
 
   useEffect(() => {
     const audio = new Audio();
-    audio.loop = true;
     audioRef.current = audio;
+    audio.addEventListener("ended", () => {
+      setTimeout(() => {
+        audio.currentTime = 0;
+        audio.play().catch(() => {});
+      }, 10000);
+    });
+
+    const voice = new Audio();
+    voice.volume = 1;
+    voiceRef.current = voice;
 
     const Ctor =
       (window as any).AudioContext || (window as any).webkitAudioContext;
@@ -85,7 +113,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
   }, [installationState?.screen]);
 
   return (
-    <AudioCtx.Provider value={{ analyser: analyserRef.current }}>
+    <AudioCtx.Provider value={{ analyser: analyserRef.current, playVoice }}>
       {children}
     </AudioCtx.Provider>
   );

@@ -2,6 +2,7 @@
 
 import { Canvas, useFrame } from "@react-three/fiber";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useAudio } from "@/core/audio/AudioProvider";
 import * as THREE from "three";
 
 type AudioData = {
@@ -230,17 +231,25 @@ export default function ReactiveOrb(
     dataArray: null,
   });
 
+  const globalAudio = useAudio();
+
   useEffect(() => {
+    // prefer global analyser from AudioProvider
+    if (globalAudio?.analyser) {
+      const analyser = globalAudio.analyser;
+      const dataArray = new Uint8Array(analyser.frequencyBinCount);
+      setAudioData({ analyser, dataArray });
+      return;
+    }
+
+    // fallback: try to use a local <audio> element on the page
     async function setupAudio() {
-      // Probeer eerst een bestaande <audio> op de pagina te gebruiken (bv. TuneMatchAR).
       if (!audioRef.current) {
         const found = document.querySelector(
           "audio",
         ) as HTMLAudioElement | null;
         if (found) {
           audioRef.current = found;
-          // als het audio-element al geluid speelt, log dat we het gebruiken
-          // eslint-disable-next-line no-console
           console.log(
             "ReactiveOrb: using existing <audio> element for analysis",
           );
@@ -248,45 +257,30 @@ export default function ReactiveOrb(
       }
 
       if (!audioRef.current) {
-        // Geen audio-element gevonden; nothing to analyze.
-        // eslint-disable-next-line no-console
         console.warn(
           "ReactiveOrb: geen <audio> element gevonden — orb reageert alleen op aanwezige audio.",
         );
         return;
       }
 
-      if (!audioContextRef.current) {
+      if (!audioContextRef.current)
         audioContextRef.current = new AudioContext();
-      }
-
       const audioContext = audioContextRef.current;
 
       if (!sourceCreatedRef.current) {
         try {
-          // createMediaElementSource vereist dat het audio element een HTMLAudioElement is
           const analyser = audioContext.createAnalyser();
           const source = audioContext.createMediaElementSource(
             audioRef.current,
           );
-
           analyser.fftSize = 1024;
           analyser.smoothingTimeConstant = 0.74;
-
           source.connect(analyser);
-
-          // Als je audio hoorbaar wil via deze context, kun je de volgende regel activeren:
-          // analyser.connect(audioContext.destination);
-
           const dataArray = new Uint8Array(analyser.frequencyBinCount);
-
           setAudioData({ analyser, dataArray });
-
           sourceCreatedRef.current = true;
-          // eslint-disable-next-line no-console
           console.log("ReactiveOrb: WebAudio analyser aangemaakt");
         } catch (err) {
-          // eslint-disable-next-line no-console
           console.error(
             "ReactiveOrb: kon MediaElementSource niet aanmaken:",
             err,
@@ -296,18 +290,10 @@ export default function ReactiveOrb(
       }
 
       try {
-        // Resume audio context in geval van gebruikers-interactie vereiste
-        if (audioContext.state === "suspended") {
-          await audioContext.resume();
-        }
-
-        // probeer audio te spelen als het element nog niet speelt (vaak al aanwezig in app)
+        if (audioContext.state === "suspended") await audioContext.resume();
         audioRef.current.muted = true;
-        await audioRef.current.play().catch(() => {
-          // autoplay kan geblokkeerd worden; dat is ok
-        });
+        await audioRef.current.play().catch(() => {});
       } catch (err) {
-        // eslint-disable-next-line no-console
         console.warn("ReactiveOrb: probleem bij starten audio playback:", err);
       }
     }
