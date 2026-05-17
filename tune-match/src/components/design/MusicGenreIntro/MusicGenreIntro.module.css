@@ -5,6 +5,11 @@
 
 /* ── CSS Custom Properties (kleuren & tokens) ──
    Pas hier de neonkleuren, glow-intensiteit, enz. aan */
+/* ═══════════════════════════════════════════════
+   MusicGenreIntro.module.css
+   TuneMatch versie — zachtere paarse stijl
+   ═══════════════════════════════════════════════ */
+
 .wrapper {
   --c-bg: #050810;
   --c-bg2: #0a0f1e;
@@ -26,7 +31,11 @@
   width: 100vw;
   height: 100vh;
   overflow: hidden;
-  background: radial-gradient(ellipse 80% 60% at 50% 30%, #0d1433 0%, var(--c-bg) 100%);
+  background: radial-gradient(
+    ellipse 80% 60% at 50% 30%,
+    #0d1433 0%,
+    var(--c-bg) 100%
+  );
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -56,27 +65,39 @@
   left: calc((var(--i) * 4.16%) + 1%);
   top: calc((var(--i) * 3.7%) % 90% + 5%);
   background: hsl(calc(var(--i) * 22), 90%, 65%);
-  animation: floatParticle calc(4s + var(--i) * 0.3s) ease-in-out infinite alternate;
+  animation: floatParticle calc(4s + var(--i) * 0.3s) ease-in-out infinite
+    alternate;
   animation-delay: calc(var(--i) * -0.25s);
   filter: blur(0.5px);
 }
 
 @keyframes floatParticle {
-  from { transform: translateY(0) scale(1); opacity: 0.4; }
-  to   { transform: translateY(-18px) scale(1.3); opacity: 1; }
+  from {
+    transform: translateY(0) scale(1);
+    opacity: 0.4;
+  }
+  to {
+    transform: translateY(-18px) scale(1.3);
+    opacity: 1;
+  }
 }
 
 /* ── Neon glow overlay (scene 4) ── */
 .glowOverlay {
   position: absolute;
   inset: 0;
+
   pointer-events: none;
-  background: radial-gradient(ellipse 70% 50% at 50% 50%,
-    rgba(168, 85, 247, 0.25) 0%,
-    rgba(34, 211, 238, 0.15) 40%,
+
+  background: radial-gradient(
+    ellipse 70% 50% at 50% 50%,
+    rgba(217, 70, 239, 0.18) 0%,
+    rgba(96, 165, 250, 0.08) 45%,
     transparent 70%
   );
-  opacity: 0; /* gereset door GSAP */
+
+  opacity: 0;
+
   mix-blend-mode: screen;
 }
 
@@ -85,96 +106,149 @@
    ═══════════════════════════════════════════════ */
 .screen {
   position: relative;
+
   width: min(860px, 90vw);
+
   min-height: clamp(110px, 18vh, 180px);
-  background: linear-gradient(135deg, rgba(10, 15, 40, 0.95) 0%, rgba(5, 8, 20, 0.98) 100%);
-  border: 1px solid rgba(168, 85, 247, 0.4);
-  border-radius: 12px;
+
+  background: rgba(255, 255, 255, 0.05);
+
+  border: 1px solid rgba(255, 255, 255, 0.1);
+
+  border-radius: 18px;
+
   box-shadow:
-    0 0 0 1px rgba(168, 85, 247, 0.15),
-    0 0 40px rgba(168, 85, 247, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    0 0 40px rgba(217, 70, 239, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+
   padding: clamp(14px, 2.5vh, 28px) clamp(20px, 3vw, 40px);
+
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: flex-start;
+
   gap: 8px;
+
   overflow: hidden;
+
   flex-shrink: 0;
+
+  backdrop-filter: blur(8px);
 }
 
-/* Scanline decoratief effect op het scherm */
 .screen::after {
   content: "";
+
   position: absolute;
   inset: 0;
+
   background: repeating-linear-gradient(
     to bottom,
     transparent,
     transparent 3px,
-    rgba(255, 255, 255, 0.015) 3px,
-    rgba(255, 255, 255, 0.015) 4px
+    rgba(255, 255, 255, 0.01) 3px,
+    rgba(255, 255, 255, 0.01) 4px
   );
+
   pointer-events: none;
+
   border-radius: inherit;
 }
 
 .screenBadge {
   font-size: clamp(9px, 1.1vw, 13px);
-  color: var(--c-green);
+
+  color: #f0abfc;
+
   letter-spacing: 0.2em;
+
   text-transform: uppercase;
+
   animation: blink 1.6s step-end infinite;
 }
 
 @keyframes blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.2; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.2;
+  }
 }
 
 .screenInner {
   display: flex;
   flex-direction: column;
   gap: 8px;
+
   width: 100%;
+
   position: relative;
   z-index: 1;
+}
+
+.instructionText {
+  margin: 0;
+
+  font-size: clamp(18px, 3.2vw, 42px);
+
+  font-weight: 500;
+
+  letter-spacing: -0.02em;
+
+  color: white;
+
+  line-height: 1.2;
 }
 
 /* Hoofdinstructie tekst */
 .instructionText {
   margin: 0;
+
   font-size: clamp(18px, 3.2vw, 42px);
-  font-weight: 400;
-  letter-spacing: 0.04em;
-  color: var(--c-white);
-  text-shadow: 0 0 20px rgba(168, 85, 247, 0.6), 0 0 40px rgba(34, 211, 238, 0.2);
+
+  font-weight: 500;
+
+  letter-spacing: -0.02em;
+
+  color: white;
+
   line-height: 1.2;
 }
 
 /* ── Vraagblok (scene 2) ── */
 .questionBlock {
   margin-top: 6px;
-  padding: 10px 16px;
-  background: rgba(34, 211, 238, 0.08);
-  border-left: 3px solid var(--c-cyan);
-  border-radius: 4px;
-  /* Verborgen door GSAP */
+
+  padding: 12px 16px;
+
+  background: rgba(217, 70, 239, 0.08);
+
+  border-left: 3px solid #e879f9;
+
+  border-radius: 8px;
 }
 
 .questionLabel {
   margin: 0 0 4px;
+
   font-size: clamp(9px, 1vw, 12px);
+
   letter-spacing: 0.25em;
-  color: var(--c-cyan);
+
+  color: #f0abfc;
+
   text-transform: uppercase;
 }
 
 .questionText {
   margin: 0;
+
   font-size: clamp(14px, 2vw, 26px);
-  color: var(--c-white);
+
+  color: white;
 }
 
 /* ── Resultaatblok (scene 4) ── */
@@ -197,38 +271,45 @@
   margin: 0;
   font-size: clamp(20px, 3.5vw, 48px);
   color: var(--c-white);
-  text-shadow: 0 0 24px var(--c-purple), 0 0 48px var(--c-cyan);
+  text-shadow:
+    0 0 24px var(--c-purple),
+    0 0 48px var(--c-cyan);
   letter-spacing: 0.05em;
 }
 
 /* ── Equalizer bars in scherm (scene 4) ── */
 .equalizer {
   position: absolute;
+
   bottom: 0;
   left: 0;
   right: 0;
+
   height: 40%;
+
   display: flex;
   align-items: flex-end;
+
   gap: 2px;
+
   padding: 0 20px;
-  /* Verborgen door GSAP */
 }
 
 .eqBar {
   flex: 1;
-  min-height: 4px;
-  border-radius: 2px 2px 0 0;
-  background: linear-gradient(
-    to top,
-    hsl(calc(var(--idx) * 14 + 260), 90%, 60%),
-    hsl(calc(var(--idx) * 14 + 200), 95%, 70%)
-  );
-  opacity: 0.7;
-  transform-origin: bottom;
-  box-shadow: 0 0 6px hsl(calc(var(--idx) * 14 + 240), 80%, 60%);
-}
 
+  min-height: 4px;
+
+  border-radius: 2px 2px 0 0;
+
+  background: linear-gradient(to top, #9333ea, #e879f9);
+
+  opacity: 0.7;
+
+  transform-origin: bottom;
+
+  box-shadow: 0 0 6px rgba(217, 70, 239, 0.4);
+}
 /* ═══════════════════════════════════════════════
    CENTRALE INSTALLATIE — vloer + cirkel + avatar
    ═══════════════════════════════════════════════ */
@@ -289,10 +370,14 @@
 /* ── Centrale cirkel ── */
 .circleWrap {
   position: absolute;
+
   top: 50%;
   left: 50%;
+
   transform: translate(-50%, -50%);
+
   z-index: 4;
+
   display: flex;
   align-items: center;
   justify-content: center;
@@ -300,66 +385,105 @@
 
 .circle {
   position: relative;
+
   width: clamp(70px, 12vw, 140px);
   height: clamp(70px, 12vw, 140px);
+
   border-radius: 50%;
-  border: 2px solid rgba(168, 85, 247, 0.7);
+
+  border: 2px solid #e879f9;
+
   display: flex;
   align-items: center;
   justify-content: center;
-  background: radial-gradient(circle, rgba(168, 85, 247, 0.1) 0%, transparent 70%);
+
+  background: radial-gradient(
+    circle,
+    rgba(217, 70, 239, 0.08) 0%,
+    transparent 70%
+  );
 }
 
 .circleCenter {
   font-size: clamp(8px, 1.5vw, 18px);
-  color: rgba(168, 85, 247, 0.5);
+
+  color: rgba(232, 121, 249, 0.45);
+
   animation: rotateSlow 6s linear infinite;
 }
 
 @keyframes rotateSlow {
-  from { transform: rotate(0deg); }
-  to   { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .circleGlow {
   position: absolute;
+
   width: clamp(110px, 18vw, 210px);
   height: clamp(110px, 18vw, 210px);
+
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(168, 85, 247, 0.35) 0%, transparent 70%);
+
+  background: radial-gradient(
+    circle,
+    rgba(217, 70, 239, 0.2) 0%,
+    transparent 70%
+  );
+
   filter: blur(12px);
+
   pointer-events: none;
 }
 
-/* ── Hologram avatar ── */
+/* ═══════════════════════════════════════════════
+   AVATAR
+   ═══════════════════════════════════════════════ */
+
 .avatar {
   position: absolute;
+
   top: 50%;
   left: 50%;
+
   transform: translate(-50%, -50%);
+
   z-index: 5;
+
   display: flex;
   flex-direction: column;
+
   align-items: center;
+
   gap: 2px;
-  filter: drop-shadow(0 0 10px rgba(34, 211, 238, 0.8));
+
+  filter: drop-shadow(0 0 10px rgba(217, 70, 239, 0.45));
+}
+
+.avatarHead,
+.avatarBody,
+.avatarLeg {
+  background: linear-gradient(180deg, #e879f9, #7c3aed);
+
+  box-shadow: 0 0 18px rgba(217, 70, 239, 0.35);
 }
 
 .avatarHead {
   width: clamp(16px, 2.8vw, 34px);
   height: clamp(16px, 2.8vw, 34px);
+
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--c-cyan) 0%, var(--c-purple) 100%);
-  opacity: 0.9;
-  border: 1.5px solid rgba(34, 211, 238, 0.6);
 }
 
 .avatarBody {
   width: clamp(22px, 3.5vw, 44px);
   height: clamp(26px, 4.2vw, 52px);
-  background: linear-gradient(180deg, rgba(34, 211, 238, 0.6) 0%, rgba(168, 85, 247, 0.4) 100%);
+
   border-radius: 4px 4px 2px 2px;
-  border: 1.5px solid rgba(34, 211, 238, 0.4);
 }
 
 .avatarLegs {
@@ -370,29 +494,35 @@
 .avatarLeg {
   width: clamp(8px, 1.3vw, 16px);
   height: clamp(18px, 3vw, 36px);
-  background: linear-gradient(180deg, rgba(168, 85, 247, 0.6) 0%, rgba(34, 211, 238, 0.4) 100%);
+
   border-radius: 2px 2px 4px 4px;
-  border: 1px solid rgba(168, 85, 247, 0.4);
 }
 
-/* Hologram scan-line op avatar */
 .avatarScan {
   position: absolute;
   inset: -4px;
+
   border-radius: 4px;
+
   background: linear-gradient(
     to bottom,
     transparent 40%,
-    rgba(34, 211, 238, 0.25) 50%,
+    rgba(232, 121, 249, 0.25) 50%,
     transparent 60%
   );
+
   animation: scanLine 2s linear infinite;
+
   pointer-events: none;
 }
 
 @keyframes scanLine {
-  from { background-position: 0 -100%; }
-  to   { background-position: 0 100%; }
+  from {
+    background-position: 0 -100%;
+  }
+  to {
+    background-position: 0 100%;
+  }
 }
 
 /* ═══════════════════════════════════════════════

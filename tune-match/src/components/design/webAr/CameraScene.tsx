@@ -7,6 +7,7 @@ type CameraSceneProps = {
   cameraLive: boolean;
   countdown: number | null;
   cameraBoxRef: React.RefObject<HTMLDivElement | null>;
+  className?: string;
   onCameraLive: () => void;
   onCameraError: (message: string) => void;
   cardLabelRef: any;
@@ -37,6 +38,7 @@ export default function CameraScene({
   cameraLive,
   countdown,
   cameraBoxRef,
+  className,
   onCameraLive,
   onCameraError,
   cardLabelRef,
@@ -83,12 +85,12 @@ export default function CameraScene({
   }, [scriptsReady, cameraBoxRef, onCameraLive, onCameraError]);
 
   const showLoading = !cameraLive;
+  const containerClasses =
+    className ??
+    "mindar-camera-box relative mx-auto mt-6 h-[375px] w-[500px] max-w-full overflow-hidden rounded-3xl border border-white/20 bg-black shadow-2xl";
 
   return (
-    <div
-      ref={cameraBoxRef}
-      className="mindar-camera-box relative mx-auto mt-6 h-[375px] w-[500px] max-w-full overflow-hidden rounded-3xl border border-white/20 bg-black shadow-2xl"
-    >
+    <div ref={cameraBoxRef} className={containerClasses}>
       {countdown && (
         <div className="absolute inset-0 z-50 grid place-items-center bg-black/30 text-8xl font-black text-white">
           {countdown}

@@ -554,60 +554,88 @@ export default function TuneMatchAR() {
   }
 
   return (
-    <main className="page">
-      <h1>TuneMatch 🎵</h1>
+    <main className="relative flex min-h-screen flex-col overflow-hidden bg-[linear-gradient(135deg,_#140421_0%,_#250a36_40%,_#16213e_100%)] px-8 py-10">
+      <div className="pointer-events-none absolute left-1/2 top-0 h-[420px] w-[420px] -translate-x-1/2 rounded-full bg-fuchsia-500/10 blur-3xl" />
 
-      <div className="controls">
-        <div>
-          <p>Quiz result: {resultGenre?.name ?? "waiting for result"}</p>
-          <p>Deezer vibe: {selectedGenre ?? "not matched yet"}</p>
-          <p>
-            {isSearching
-              ? "Searching Deezer automatically..."
-              : "Waiting for the quiz result to start the search."}
+      <div className="relative z-10 flex flex-1 flex-col items-center justify-center gap-12 lg:flex-row lg:items-center lg:justify-center lg:gap-16">
+        <div className="flex flex-col items-center">
+          <CameraScene
+            scriptsReady={scriptsReady}
+            cameraLive={cameraLive}
+            countdown={countdown}
+            cameraBoxRef={cameraBoxRef}
+            className="relative h-[375px] w-[500px] max-w-full overflow-hidden rounded-[28px] border border-fuchsia-400/40 bg-black/15 shadow-[0_0_40px_rgba(217,70,239,0.2)]"
+            onCameraLive={() => setCameraLive(true)}
+            onCameraError={(message) => setCameraError(message)}
+            cardLabelRef={cardLabelRef}
+            cardTitleRef={cardTitleRef}
+            cardSubtitleRef={cardSubtitleRef}
+            cardDescriptionRef={cardDescriptionRef}
+            cardCoverRef={cardCoverRef}
+          />
+
+          {cameraError ? (
+            <p className="mt-4 text-sm text-red-300">{cameraError}</p>
+          ) : null}
+        </div>
+
+        <div className="flex max-w-md flex-col items-center text-center">
+          <h1 className="text-6xl font-semibold tracking-tight text-white sm:text-7xl">
+            {resultGenre?.name ?? "Loading"}
+          </h1>
+
+          <p className="mt-3 text-lg font-medium text-fuchsia-300">
+            Your Music Genre
           </p>
+
+          <p className="mt-3 text-base leading-relaxed text-white/70">
+            {selectedGenre
+              ? genreVibes[selectedGenre]?.description
+              : isSearching
+                ? "Finding your soundtrack..."
+                : "Waiting for the quiz result to start the search."}
+          </p>
+
+          <p className="mt-6 text-sm text-white/45">
+            Quiz result: {resultGenre?.name ?? "waiting for result"}
+          </p>
+
+          <p className="text-sm text-white/45">
+            Deezer vibe: {selectedGenre ?? "not matched yet"}
+          </p>
+
+          {photoUrl && (
+            <div className="mt-10 rounded-3xl border border-white/10 bg-white/6 p-6 shadow-[0_18px_50px_rgba(0,0,0,0.18)] backdrop-blur-sm">
+              <p className="mb-4 text-sm text-white/65">
+                Scan to download your photo
+              </p>
+
+              <div className="overflow-hidden rounded-2xl bg-white p-3">
+                <QRCodeSVG value={photoDownloadUrl || photoUrl} size={180} />
+              </div>
+
+              <p className="mt-4 text-sm text-white/45">Share your result</p>
+
+              <a
+                href={photoDownloadUrl || photoUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-4 inline-flex items-center justify-center rounded-full border border-white/15 px-4 py-2 text-sm font-medium text-white transition hover:border-white/30 hover:bg-white/10"
+              >
+                Open Photo
+              </a>
+            </div>
+          )}
         </div>
       </div>
 
-      <audio ref={audioRef} controls />
+      <p className="relative z-10 mt-8 text-center text-sm text-white/40">
+        {isSearching
+          ? "Searching Deezer automatically..."
+          : "Waiting for the quiz result to start the search."}
+      </p>
 
-      {cameraError ? (
-        <p className="mt-4 text-center text-sm text-red-400">{cameraError}</p>
-      ) : null}
-
-      <CameraScene
-        scriptsReady={scriptsReady}
-        cameraLive={cameraLive}
-        countdown={countdown}
-        cameraBoxRef={cameraBoxRef}
-        onCameraLive={() => setCameraLive(true)}
-        onCameraError={(message) => setCameraError(message)}
-        cardLabelRef={cardLabelRef}
-        cardTitleRef={cardTitleRef}
-        cardSubtitleRef={cardSubtitleRef}
-        cardDescriptionRef={cardDescriptionRef}
-        cardCoverRef={cardCoverRef}
-      />
-
-      {photoUrl && (
-        <div className="photo-result">
-          <h2>Your TuneMatch Photo</h2>
-
-          <img src={photoUrl} alt="TuneMatch screenshot" />
-
-          <a
-            href={photoDownloadUrl || photoUrl}
-            target="_blank"
-            rel="noreferrer"
-          >
-            Open Photo
-          </a>
-
-          <div className="qr-wrapper">
-            <QRCodeSVG value={photoDownloadUrl || photoUrl} size={160} />
-          </div>
-        </div>
-      )}
+      <audio ref={audioRef} controls className="hidden" />
     </main>
   );
 }

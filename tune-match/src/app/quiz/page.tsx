@@ -2,7 +2,6 @@
 
 import { useEffect } from "react";
 import Image from "next/image";
-import Logo from "../../components/design/logo";
 import { ZONES } from "@/core/modules/zones/types";
 import { useQuizState } from "../../components/functional/QuizStateProvider";
 
@@ -67,11 +66,20 @@ export default function QuizPage() {
   const isQuestionPhase = installationState?.screen === "question";
 
   return (
-    <main className="flex min-h-screen w-full flex-col items-center justify-start gap-10 p-6">
-      <Logo className="mx-auto mb-10" />
+    <main className="relative flex min-h-screen w-full flex-col items-center justify-start gap-8 overflow-hidden bg-[linear-gradient(135deg,_#140421_0%,_#250a36_40%,_#16213e_100%)] p-6">
+      <div className="pointer-events-none absolute top-20 h-80 w-80 rounded-full bg-fuchsia-500/10 blur-3xl" />
+
+      <Image
+        src="/icons/LogoTuneMatch.png"
+        alt="TuneMatch logo"
+        width={620}
+        height={420}
+        priority
+        className="relative z-10 mx-auto mb-10 h-auto w-[260px] object-contain md:w-[320px]"
+      />
 
       <div
-        className="h-2 max-w-100 w-full overflow-hidden rounded-full bg-slate-200"
+        className="relative z-10 h-2 max-w-100 w-full overflow-hidden rounded-full bg-white/15"
         role="progressbar"
         aria-label="Quiz progress"
         aria-valuemin={0}
@@ -79,27 +87,28 @@ export default function QuizPage() {
         aria-valuenow={currentIndex + 1}
       >
         <div
-          className="h-full rounded-full bg-violet-600 transition-[width] duration-300"
+          className="h-full rounded-full bg-fuchsia-400 transition-[width] duration-300"
           style={{ width: `${progressPercent}%` }}
         />
       </div>
 
-      <div className="flex w-full flex-row items-center justify-around">
+      <div className="relative z-10 flex w-full flex-row items-center justify-around">
         <Image
           src="/icons/audio-wave.svg"
           alt="Audio wave icon"
           width={128}
           height={128}
+          className="animate-pulse opacity-70"
         />
 
         <div
-          className="flex items-center justify-center rounded-3xl px-15 py-12.5"
+          className="flex items-center justify-center rounded-3xl border border-white/10 px-15 py-12.5 shadow-[0_18px_50px_rgba(0,0,0,0.16)]"
           style={{
             backgroundColor:
-              "color-mix(in srgb, var(--light-purple) 20%, transparent)",
+              "color-mix(in srgb, var(--light-purple) 24%, transparent)",
           }}
         >
-          <h1 className="mt-3 text-center text-4xl font-semibold text-white">
+          <h1 className="mt-3 text-center text-4xl font-medium text-white">
             {currentQuestion.text}
           </h1>
         </div>
@@ -109,12 +118,13 @@ export default function QuizPage() {
           alt="Audio wave icon"
           width={128}
           height={128}
+          className="animate-pulse opacity-70"
         />
       </div>
 
-      <div className="mt-auto w-full pt-8">
+      <div className="relative z-10 mt-auto w-full pt-8">
         {errorMessage ? (
-          <p className="mb-3 text-sm text-red-600">{errorMessage}</p>
+          <p className="mb-3 text-sm text-red-200">{errorMessage}</p>
         ) : null}
 
         <div className="grid gap-4 md:grid-cols-2">
@@ -138,13 +148,13 @@ export default function QuizPage() {
                   type="button"
                   onClick={() => handleAnswerClick(option.id)}
                   disabled={isSubmitting || !isQuestionPhase}
-                  className={`flex min-h-24 items-center justify-between gap-4 rounded-3xl border px-5 py-4 text-left text-white shadow-[0_18px_50px_rgba(0,0,0,0.18)] transition bg-[radial-gradient(circle_at_top_left,rgba(101,31,161,0.9),rgba(40,10,47,0.96))] disabled:cursor-not-allowed disabled:opacity-60 ${
+                  className={`flex min-h-24 items-center justify-between gap-4 rounded-3xl border px-5 py-4 text-left text-white shadow-[0_18px_50px_rgba(0,0,0,0.16)] transition backdrop-blur-sm disabled:cursor-not-allowed disabled:opacity-60 ${
                     isDwelling
-                      ? "border-white/40 scale-[1.02]"
-                      : "border-white/10 hover:border-white/20 hover:-translate-y-px"
+                      ? "scale-[1.02] border-fuchsia-300/50 bg-fuchsia-500/15"
+                      : "border-white/10 bg-white/8 hover:-translate-y-px hover:border-white/20 hover:bg-white/10"
                   }`}
                 >
-                  <span className="text-lg font-semibold leading-tight sm:text-xl">
+                  <span className="text-lg font-medium leading-tight sm:text-xl">
                     {option.label}
                   </span>
 
@@ -167,7 +177,7 @@ export default function QuizPage() {
                         cy="24"
                         r="20"
                         fill="none"
-                        stroke="white"
+                        stroke="rgb(232 121 249)"
                         strokeWidth="3"
                         strokeLinecap="round"
                         strokeDasharray={`${strokeLength} ${CIRCUMFERENCE}`}
@@ -175,7 +185,7 @@ export default function QuizPage() {
                       />
                     </svg>
 
-                    <span className="relative z-10 flex h-10 w-10 items-center justify-center rounded-full bg-blue-500 text-sm font-semibold text-white shadow-md shadow-blue-500/30">
+                    <span className="relative z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/12 text-sm font-medium text-white ring-1 ring-white/20">
                       {index + 1}
                     </span>
                   </span>
@@ -191,6 +201,7 @@ export default function QuizPage() {
         alt="Audio wave icon"
         width={128}
         height={128}
+        className="relative z-10 animate-pulse opacity-55"
       />
     </main>
   );
