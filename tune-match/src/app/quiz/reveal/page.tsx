@@ -24,7 +24,7 @@ export default function QuizRevealPage() {
 
   <div className="relative w-full max-w-md rounded-3xl border border-white/10 bg-white/5 p-8 text-center shadow-[0_0_50px_rgba(217,70,239,0.18)] backdrop-blur-md">
     <p className="text-sm font-medium uppercase tracking-[0.3em] text-fuchsia-200/80">
-      Your answer
+      Jouw antwoord
     </p>
 
     <h1 className="mt-4 text-4xl font-semibold tracking-tight text-white">
