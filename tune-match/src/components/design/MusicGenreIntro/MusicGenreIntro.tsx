@@ -294,7 +294,7 @@ export default function MusicGenreIntro() {
           duration: 0.4,
         })
         .to(avatarRef.current, { autoAlpha: 0, y: 80, duration: 0.6 })
-        .to({}, { duration: 0.3 });
+        .to({}, { duration: 1 });
     }, containerRef);
 
     return () => ctx.revert(); // opkuisen bij unmount
@@ -322,7 +322,6 @@ export default function MusicGenreIntro() {
     }
   }
 
-  // ── JSX ───────────────────────────────────
   return (
     <div
       ref={containerRef}
@@ -454,7 +453,6 @@ export default function MusicGenreIntro() {
         <div className={styles.phoneScreen} />
         <div className={styles.phoneBtn} />
       </div>
-
     </div>
   );
 }

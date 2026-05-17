@@ -24,7 +24,7 @@ export const installationState = {
   selections: [] as Zone[],
 
   /** Time on answer_reveal before next question or result */
-  revealDelayMs: 1500,
+  revealDelayMs: 5_000,
 
   /** Explanation / intro screen */
   introDurationMs: 30_000,
