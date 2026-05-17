@@ -405,15 +405,15 @@ export default function TuneMatchAR() {
 
       const textX = cardX + 104;
 
-      ctx.fillStyle = "#00FFFF";
+      ctx.fillStyle = "#F0ABFC";
       ctx.font = "700 11px Arial";
       ctx.fillText("YOUR TUNEMATCH", textX, cardY + 28);
 
-      ctx.fillStyle = "#FFD400";
+      ctx.fillStyle = "#FFFFFF";
       ctx.font = "700 22px Arial";
       ctx.fillText(dataForPhoto.vibeTitle, textX, cardY + 55);
 
-      ctx.fillStyle = "#FFFFFF";
+      ctx.fillStyle = "#E879F9";
       ctx.font = "14px Arial";
       ctx.fillText(dataForPhoto.soundtrack.slice(0, 42), textX, cardY + 76);
 
@@ -421,9 +421,16 @@ export default function TuneMatchAR() {
       ctx.font = "12px Arial";
       ctx.fillText(dataForPhoto.description.slice(0, 50), textX, cardY + 94);
 
-      ctx.fillStyle = "rgba(255,255,255,0.86)";
-      ctx.font = "700 18px Arial";
-      ctx.fillText("TuneMatch 🎵", 18, 32);
+      const logo = new Image();
+      logo.src = "/icons/LogoTuneMatch.png";
+
+      await new Promise((resolve) => {
+        logo.onload = resolve;
+      });
+
+      ctx.globalAlpha = 0.9;
+      ctx.drawImage(logo, 18, 14, 85, 34);
+      ctx.globalAlpha = 1;
 
       const dataUrl = canvas.toDataURL("image/png");
 
@@ -601,7 +608,7 @@ export default function TuneMatchAR() {
     <main className="relative flex min-h-screen flex-col overflow-hidden bg-[linear-gradient(135deg,_#140421_0%,_#250a36_40%,_#16213e_100%)] px-8 py-10">
       <div className="pointer-events-none absolute left-1/2 top-0 h-[420px] w-[420px] -translate-x-1/2 rounded-full bg-fuchsia-500/10 blur-3xl" />
 
-      <div className="relative z-10 flex flex-1 flex-col items-center justify-center gap-12 lg:flex-row lg:items-center lg:justify-center lg:gap-16">
+      <div className="relative z-10 flex flex-1 flex-col items-center justify-center gap-12 lg:flex-row lg:items-center lg:justify-center lg:gap-20">
         <div className="flex flex-col items-center">
           <CameraScene
             scriptsReady={scriptsReady}
@@ -623,13 +630,13 @@ export default function TuneMatchAR() {
           ) : null}
         </div>
 
-        <div className="flex max-w-md flex-col items-center text-center">
+        <div className="flex max-w-md flex-col items-center text-center gap-4">
           <h1 className="text-6xl font-semibold tracking-tight text-white sm:text-7xl">
             {resultGenre?.name ?? "Loading"}
           </h1>
 
           <p className="mt-3 text-lg font-medium text-fuchsia-300">
-            Your Music Genre
+            Jouw muziek genre vibe in
           </p>
 
           <p className="mt-3 text-base leading-relaxed text-white/70">
@@ -641,17 +648,13 @@ export default function TuneMatchAR() {
           </p>
 
           <p className="mt-6 text-sm text-white/45">
-            Quiz result: {resultGenre?.name ?? "waiting for result"}
-          </p>
-
-          <p className="text-sm text-white/45">
-            Deezer vibe: {selectedGenre ?? "not matched yet"}
+            Quiz resultaat: {resultGenre?.name ?? "waiting for result"}
           </p>
 
           {photoUrl && (
             <div className="mt-10 rounded-3xl border border-white/10 bg-white/6 p-6 shadow-[0_18px_50px_rgba(0,0,0,0.18)] backdrop-blur-sm">
               <p className="mb-4 text-sm text-white/65">
-                Scan to download your photo
+                Scan om je foto te downloaden
               </p>
 
               <div className="overflow-hidden rounded-2xl bg-white p-3">
@@ -666,18 +669,12 @@ export default function TuneMatchAR() {
                 rel="noreferrer"
                 className="mt-4 inline-flex items-center justify-center rounded-full border border-white/15 px-4 py-2 text-sm font-medium text-white transition hover:border-white/30 hover:bg-white/10"
               >
-                Open Photo
+                Open foto
               </a>
             </div>
           )}
         </div>
       </div>
-
-      <p className="relative z-10 mt-8 text-center text-sm text-white/40">
-        {isSearching
-          ? "Searching Deezer automatically..."
-          : "Waiting for the quiz result to start the search."}
-      </p>
 
       <audio ref={audioRef} controls className="hidden" />
     </main>

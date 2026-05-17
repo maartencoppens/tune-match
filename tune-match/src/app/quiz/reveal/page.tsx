@@ -22,7 +22,7 @@ export default function QuizRevealPage() {
     <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[linear-gradient(135deg,_#140421_0%,_#250a36_40%,_#16213e_100%)] p-6">
   <div className="pointer-events-none absolute h-80 w-80 rounded-full bg-fuchsia-500/20 blur-3xl" />
 
-  <div className="relative w-full max-w-md rounded-3xl border border-white/10 bg-white/5 p-8 text-center shadow-[0_0_50px_rgba(217,70,239,0.18)] backdrop-blur-md">
+  <div className="gap-10 relative w-full max-w-md rounded-3xl border border-white/10 bg-white/5 p-8 text-center shadow-[0_0_50px_rgba(217,70,239,0.18)] backdrop-blur-md">
     <p className="text-sm font-medium uppercase tracking-[0.3em] text-fuchsia-200/80">
       Jouw antwoord
     </p>

@@ -28,13 +28,13 @@ export default function ResultPage() {
     <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[linear-gradient(135deg,_#140421_0%,_#250a36_40%,_#16213e_100%)] p-6">
       {" "}
       <div className="pointer-events-none absolute top-20 h-80 w-80 rounded-full bg-fuchsia-500/10 blur-3xl" />{" "}
-      <div className="relative w-full max-w-md rounded-3xl border border-white/10 bg-white/6 p-8 text-center shadow-[0_18px_50px_rgba(0,0,0,0.18)] backdrop-blur-sm">
+      <div className="gap-10 relative w-full max-w-md rounded-3xl border border-white/10 bg-white/6 p-8 text-center shadow-[0_18px_50px_rgba(0,0,0,0.18)] backdrop-blur-sm">
         {" "}
         <Image
           src="/icons/LogoTuneMatch.png"
           alt="TuneMatch logo"
-          width={320}
-          height={180}
+          width={620}
+          height={480}
           priority
           className="mx-auto mb-6 h-auto w-[180px] object-contain"
         />{" "}
