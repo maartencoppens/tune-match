@@ -241,7 +241,15 @@ export default function TuneMatchAR() {
 
         setScriptsReady(true);
       } catch (error) {
-        console.error(error);
+        const errorMessage =
+          error instanceof Error ? error.message : String(error);
+        const errorStack = error instanceof Error ? error.stack : undefined;
+
+        console.error("[TuneMatchAR] WebAR setup failed:", {
+          message: errorMessage,
+          stack: errorStack,
+        });
+
         setCameraError(
           error instanceof Error
             ? error.message
@@ -392,8 +400,20 @@ export default function TuneMatchAR() {
       setPhotoUrl(data.imageUrl);
       setPhotoDownloadUrl(data.downloadUrl ?? data.imageUrl);
     } catch (error) {
-      console.error("Screenshot/upload fout:", error);
-      alert("Screenshot maken is mislukt. Check de console.");
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      const errorStack = error instanceof Error ? error.stack : undefined;
+
+      console.error("[TuneMatchAR] Screenshot/upload error:", {
+        message: errorMessage,
+        stack: errorStack,
+      });
+
+      setCameraError(
+        errorMessage.includes("upload")
+          ? "Upload naar Cloudinary mislukt"
+          : "Screenshot maken is mislukt",
+      );
     }
   }
 
@@ -453,11 +473,26 @@ export default function TuneMatchAR() {
         `/api/search?artist=${encodeURIComponent(randomArtist)}`,
       );
 
-      const data = await response.json();
-      const songsWithPreview = data.data.filter((song: any) => song.preview);
+      if (!response.ok) {
+        throw new Error(`Search API error: ${response.status}`);
+      }
+
+      const data = (await response.json()) as unknown;
+
+      if (
+        !data ||
+        typeof data !== "object" ||
+        !Array.isArray((data as any).data)
+      ) {
+        throw new Error("Invalid search response format");
+      }
+
+      const songsWithPreview = (data as any).data.filter(
+        (song: any) => song.preview && typeof song.preview === "string",
+      );
 
       if (songsWithPreview.length === 0) {
-        alert("Geen preview gevonden");
+        setCameraError("Geen song preview gevonden voor deze artiest");
         return;
       }
 
@@ -487,14 +522,32 @@ export default function TuneMatchAR() {
 
       if (audioRef.current) {
         audioRef.current.src = randomSong.preview;
-        audioRef.current.play();
+        try {
+          await audioRef.current.play();
+        } catch (audioError) {
+          console.warn("[TuneMatchAR] Audio playback failed:", audioError);
+        }
       }
 
       await sleep(300);
       await startPhotoTimer(newPhotoData);
     } catch (error) {
-      console.error(error);
-      alert("Er ging iets mis");
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      const errorStack = error instanceof Error ? error.stack : undefined;
+
+      console.error("[TuneMatchAR] Song search/playback error:", {
+        message: errorMessage,
+        stack: errorStack,
+      });
+
+      setCameraError(
+        errorMessage.includes("Search API")
+          ? "Kon liedjes niet zoeken. Probeer later opnieuw."
+          : errorMessage.includes("preview")
+            ? "Geen song preview gevonden"
+            : "Er ging iets mis bij het zoeken naar muziek",
+      );
     } finally {
       setIsSearching(false);
     }

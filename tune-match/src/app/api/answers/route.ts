@@ -146,10 +146,18 @@ export async function POST(request: Request) {
       resultGenre,
     });
   } catch (error) {
-    console.error("Failed to submit answer", error);
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error";
+    const errorStack = error instanceof Error ? error.stack : undefined;
 
+    console.error("[ANSWERS API] Error processing answers:", {
+      message: errorMessage,
+      stack: errorStack,
+    });
+
+    // Return generic error to client
     return NextResponse.json(
-      { error: "Failed to submit answer" },
+      { error: "Failed to process your answers. Please try again." },
       { status: 500 },
     );
   }

@@ -1,8 +1,11 @@
 import { SerialPort } from "serialport";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const port = new SerialPort({
-  path: "/dev/tty.usbmodem1101",
-  baudRate: 9600,
+  path: process.env.LED_PORT || "/dev/tty.usbmodem1101",
+  baudRate: parseInt(process.env.LED_BAUD_RATE || "115200"),
 });
 
 port.on("open", () => {
