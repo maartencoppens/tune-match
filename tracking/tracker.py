@@ -240,7 +240,7 @@ while True:
 
             # Centerpoint berekenen
             center_x = int((x1 + x2) / 2)
-            center_y = int((y1 + y2) / 2)
+            center_y = int(y2)
 
             # Actieve zone bepalen
             active_zone = get_zone(center_x, center_y)
