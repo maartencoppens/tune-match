@@ -36,6 +36,19 @@ export function sendLedMessage(message: string) {
 }
 
 export function sendLedUpdate(position: LedPosition) {
-  sendLedMessage("LED_UPDATE");
-  sendLedMessage(position);
+  const map: Record<LedPosition, string | null> = {
+    left: "1",
+    top: "2",
+    right: "3",
+    bottom: "4",
+    center: null,
+  };
+
+  const code = map[position];
+  if (code == null) {
+    console.log("[LED] No numeric mapping for position", position);
+    return;
+  }
+
+  sendLedMessage(code);
 }

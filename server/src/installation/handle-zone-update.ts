@@ -65,7 +65,7 @@ function handleQuestionZone(zone: string): void {
     }
 
     const pos = zoneToLedPosition(zone);
-    if (pos) sendLedUpdate(pos);
+    // if (pos) sendLedUpdate(pos);
   } catch (err) {
     console.warn("[LED] Failed to update on zone change", err);
   }

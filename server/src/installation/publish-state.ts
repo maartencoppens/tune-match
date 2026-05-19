@@ -36,7 +36,7 @@ export function publishInstallationState(): void {
     }
 
     const pos = zoneToLedPosition(installationState.activeZone as any);
-    if (pos) sendLedUpdate(pos);
+    // if (pos) sendLedUpdate(pos);
   } catch (err) {
     console.warn("[LED] Failed to send zone update", err);
   }
